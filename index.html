@@ -131,10 +131,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script>
-  // ====== DATA SOURCE (via Pages Function proxy to Sheets) ======
-  const DATA_URL = '/inventory/t37.csv';
+(() => {
+  if (window.__inv_init) return; window.__inv_init = true;
 
-  // ====== DOM REFS ======
   const rows = document.getElementById('rows');
   const q = document.getElementById('q');
   const cond = document.getElementById('cond');
@@ -144,105 +143,67 @@
   const exportBtn = document.getElementById('exportSel');
   const selectedBox = document.getElementById('selected');
 
-  // ====== STATE ======
   let INVENTORY = [];
   const state = { sel: new Set(), rowMap: new Map() };
 
-  // ====== HELPERS ======
+  const DATA_URL = (window.location.pathname.includes('debug-local') ? '/inventory/t37.csv' : '/api/t37');
+
   function normalizeRow(r){
-    const get = (obj, ...keys) => keys.find(k => Object.prototype.hasOwnProperty.call(obj,k) && obj[k] !== '') || null;
+    const get = (o,...k)=>k.find(x=>Object.prototype.hasOwnProperty.call(o,x)&&o[x] !== '')||null;
     const val = k => (k && r[k]!==undefined) ? String(r[k]).trim() : '';
     const toNum = x => { const n = parseInt((x||'').toString().replace(/[^0-9-]/g,''),10); return isNaN(n)?0:n; };
-
-    const pnK   = get(r,'pn','PN','PartNumber','PARTNUMBER');
-    const nsnK  = get(r,'nsn','NSN');
-    const altK  = get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
-    const descK = get(r,'desc','DESC','Description','DESCRIPTION');
-    const condK = get(r,'cond','COND','Condition','CONDITIONCD');
-    const qtyK  = get(r,'qty','Qty','QUANTITY');
-
-    return {
-      pn:   val(pnK),
-      nsn:  val(nsnK),
-      alt:  val(altK),
-      desc: val(descK),
-      cond: val(condK),
-      qty:  toNum(val(qtyK))
-    };
+    const pnK=get(r,'pn','PN','PartNumber','PARTNUMBER');
+    const nsnK=get(r,'nsn','NSN');
+    const altK=get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
+    const descK=get(r,'desc','DESC','Description','DESCRIPTION');
+    const condK=get(r,'cond','COND','Condition','CONDITIONCD');
+    const qtyK=get(r,'qty','Qty','QUANTITY');
+    return { pn:val(pnK), nsn:val(nsnK), alt:val(altK), desc:val(descK), cond:val(condK), qty:toNum(val(qtyK)) };
   }
 
   function render(){
-    const term = (q?.value || '').toLowerCase();
-    const c = cond?.value || '';
-    const mq = Number(minqty?.value || 0);
-
-    const filtered = (INVENTORY||[]).filter(r => {
-      const hay = [r.pn, r.nsn, r.alt, r.desc].join(' ').toLowerCase();
-      const hit = hay.includes(term);
-      const condOk = !c || r.cond === c;
-      const qtyOk = (Number(r.qty)||0) >= mq;
-      return hit && condOk && qtyOk;
+    const term=(q?.value||'').toLowerCase(), c=cond?.value||'', mq=Number(minqty?.value||0);
+    const filtered=(INVENTORY||[]).filter(r=>{
+      const hay=[r.pn,r.nsn,r.alt,r.desc].join(' ').toLowerCase();
+      return hay.includes(term) && (!c || r.cond===c) && ((Number(r.qty)||0)>=mq);
     });
 
-    rows.innerHTML = '';
+    rows.innerHTML='';
     state.rowMap.clear();
 
-    filtered.forEach(r => {
-      const tr = document.createElement('tr');
-      tr.className = 'hover:bg-gray-50';
-      const key = (r.pn||'') + '|' + (r.nsn||'');
-      state.rowMap.set(key, r);
-      const checked = state.sel.has(key) ? 'checked' : '';
-      tr.innerHTML = `
+    filtered.forEach(r=>{
+      const tr=document.createElement('tr'); tr.className='hover:bg-gray-50';
+      const key=(r.pn||'')+'|'+(r.nsn||''); state.rowMap.set(key,r);
+      const checked=state.sel.has(key)?'checked':'';
+      tr.innerHTML=`
         <td class="p-3 align-top"><input type="checkbox" data-key="${key}" ${checked} class="accent-blue-600"/></td>
-        <td class="p-3 sticky-col font-medium">${r.pn || ''}</td>
-        <td class="p-3">${r.nsn || ''}</td>
-        <td class="p-3">${r.alt || ''}</td>
-        <td class="p-3">${r.desc || ''}</td>
-        <td class="p-3">${r.cond || ''}</td>
-        <td class="p-3">${r.qty ?? ''}</td>`;
+        <td class="p-3 sticky-col font-medium">${r.pn||''}</td>
+        <td class="p-3">${r.nsn||''}</td>
+        <td class="p-3">${r.alt||''}</td>
+        <td class="p-3">${r.desc||''}</td>
+        <td class="p-3">${r.cond||''}</td>
+        <td class="p-3">${r.qty??''}</td>`;
       rows.appendChild(tr);
     });
     count.textContent = `${filtered.length} line item(s)`;
-
-    rows.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', e => {
-        const k = e.target.getAttribute('data-key');
-        if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
-        updateSelectedBox();
-      });
-    });
-
-    updateSelectedBox();
-  }
-
-  function updateSelectedBox(){
-    const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
-    const text = selected.map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`).join('\n');
-    if (selectedBox) selectedBox.value = text;
   }
 
   function loadData(){
+    console.log('Loading CSV from', DATA_URL);
     Papa.parse(DATA_URL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: false,
-      complete: (r) => { INVENTORY = r.data.map(normalizeRow); render(); },
-      error: (err) => { console.error('Error loading data:', err); count.textContent = 'Failed to load data.'; }
+      download:true, header:true, skipEmptyLines:true, dynamicTyping:false,
+      complete:(r)=>{ console.log('CSV rows:', r.data.length); INVENTORY=r.data.map(normalizeRow); render(); },
+      error:(err)=>{ console.error('Papa error', err); count.textContent='Failed to load data.'; }
     });
   }
 
-  // ====== WIRE UP ======
   q?.addEventListener('input', render);
   cond?.addEventListener('change', render);
   minqty?.addEventListener('input', render);
-  clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
-  exportBtn?.addEventListener('click', () => {
-    if (!state.sel.size) { alert('Select at least one line.'); return; }
-    document.getElementById('quote').scrollIntoView({ behavior:'smooth' });
-  });
+  clearBtn?.addEventListener('click', ()=>{ if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
+  exportBtn?.addEventListener('click', ()=>{ if(!state.sel.size){ alert('Select at least one line.'); return; } document.getElementById('quote').scrollIntoView({behavior:'smooth'}); });
 
   document.getElementById('yr').textContent = new Date().getFullYear();
   loadData();
+})();
 </script>
