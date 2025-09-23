@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://spares.yourdomain.com/sitemap.xml

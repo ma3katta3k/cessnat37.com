@@ -1,0 +1,9 @@
+/* 
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1
+  Referrer-Policy: no-referrer-when-downgrade
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+/inventory/*
+  Cache-Control: public, max-age=600
