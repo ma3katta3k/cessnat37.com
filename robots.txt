@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://spares.yourdomain.com/sitemap.xml
+Sitemap: https://www.cessnat37.com/sitemap.xml
+
