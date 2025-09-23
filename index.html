@@ -3,24 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cessna T‑37 Aircraft Spares | Cessna T‑37 Aircraft Spares</title>
-  <meta name="description" content="Cessna T‑37 aircraft spares list with part number, NSN, alt P/N, description, condition, and quantity. Request a quote today."/>
+  <title>Cessna T-37 Aircraft Spares | Your Company</title>
+  <meta name="description" content="Cessna T-37 aircraft spares list with part number, NSN, alt P/N, description, condition, quantity, CAGE, UoM, and price. Request a quote today."/>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* sticky first column for wide tables */
     .sticky-col { position: sticky; left: 0; background: white; box-shadow: 1px 0 0 rgba(0,0,0,.06); }
     .tg td, .tg th { border-bottom: 1px solid #e5e7eb; }
     .visually-hidden { position:absolute; clip:rect(1px,1px,1px,1px); padding:0; border:0; height:1px; width:1px; overflow:hidden; }
   </style>
+  <!-- Open Graph basics -->
+  <meta property="og:title" content="Cessna T-37 Aircraft Spares" />
+  <meta property="og:description" content="In-stock and rotable T-37 parts. Search by PN/NSN and request a quote fast." />
+  <link rel="icon" href="/assets/favicon.ico" />
 </head>
 <body class="bg-gray-50 text-gray-900">
   <!-- Top bar -->
   <header class="bg-white border-b sticky top-0 z-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-4">
-      <a href="#" class="font-semibold tracking-tight">Your Company</a>
+      <a href="/" class="font-semibold tracking-tight">Your Company</a>
       <div class="ml-auto flex items-center gap-4 text-sm">
         <a href="tel:+3530000000" class="inline-flex items-center gap-2 hover:text-blue-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 16.92v3a2 2 0 01-2.18 2 19.86 19.86 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.86 19.86 0 013.08 4.18 2 2 0 015.06 2h3a2 2 0 012 1.72c.12.9.3 1.78.57 2.63a2 2 0 01-.45 2.11L9 9a16 16 0 006 6l.54-.18a2 2 0 012.11.45c.85.27 1.73.45 2.63.57A2 2 0 0122 16.92z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 16.92v3a2 2 0 01-2.18 2 19.86 19.86 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.86 19.86 0 013.08 4.18 2 2 0 015.06 2h3a2 2 0 012 1.72c.12.9.3 1.78.57 2.63a2 2 0 01-.45 2.11L9 9a16 16 0 006 6l.54-.18a2 2 0 012.11.45c.85.27 1.73.45 2.63.57A2 2 0 0122 16.92z"/>
+          </svg>
           +353 00 000 0000
         </a>
         <a href="mailto:sales@yourco.example" class="hover:text-blue-700">sales@yourco.example</a>
@@ -33,8 +38,8 @@
   <section class="bg-[url('https://images.unsplash.com/photo-1506807803488-8eafc15316c1?q=80&w=1400&auto=format&fit=crop')] bg-cover bg-center">
     <div class="backdrop-brightness-50">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-white">
-        <h1 class="text-3xl sm:text-4xl font-bold">Cessna T‑37 Aircraft Spares</h1>
-        <p class="mt-2 max-w-2xl text-white/90">Browse in‑stock and rotable inventory. Use search & filters, then send the selected lines for a fast quote.</p>
+        <h1 class="text-3xl sm:text-4xl font-bold">Cessna T-37 Aircraft Spares</h1>
+        <p class="mt-2 max-w-2xl text-white/90">Browse in-stock and rotable inventory. Use search & filters, then send the selected lines for a fast quote.</p>
       </div>
     </div>
   </section>
@@ -44,7 +49,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <label class="block">
         <span class="text-sm font-medium">Search</span>
-        <input id="q" type="search" placeholder="Part #, NSN, Desc…" class="mt-1 w-full rounded-lg border px-3 py-2"/>
+        <input id="q" type="search" placeholder="Part #, NSN, Desc, CAGE…" class="mt-1 w-full rounded-lg border px-3 py-2"/>
       </label>
       <label class="block">
         <span class="text-sm font-medium">Condition</span>
@@ -62,8 +67,8 @@
         <input id="minqty" type="number" min="0" class="mt-1 w-full rounded-lg border px-3 py-2"/>
       </label>
       <div class="flex items-end gap-2">
-        <button id="clear" class="rounded-lg border px-3 py-2">Clear</button>
-        <button id="exportSel" class="rounded-lg bg-blue-600 text-white px-3 py-2">Quote Selected</button>
+        <button id="clear" class="rounded-lg border px-3 py-2" type="button">Clear</button>
+        <button id="exportSel" class="rounded-lg bg-blue-600 text-white px-3 py-2" type="button">Quote Selected</button>
       </div>
     </div>
   </section>
@@ -81,6 +86,9 @@
             <th class="p-3">Description</th>
             <th class="p-3">Cond</th>
             <th class="p-3">Qty</th>
+            <th class="p-3">CAGE</th>
+            <th class="p-3">UoM</th>
+            <th class="p-3">Price</th>
           </tr>
         </thead>
         <tbody id="rows" class="text-sm"></tbody>
@@ -95,12 +103,14 @@
       <div>
         <h2 class="text-2xl font-semibold">Request a Quote</h2>
         <p class="mt-2 text-gray-600">Submit your contact details and selected line items. A sales rep will respond promptly.</p>
-        <form class="mt-6 grid gap-3" onsubmit="event.preventDefault(); submitQuote();">
-          <input required id="name" placeholder="Name" class="rounded-lg border px-3 py-2" />
-          <input required id="email" type="email" placeholder="Email" class="rounded-lg border px-3 py-2" />
-          <input id="phone" placeholder="Phone" class="rounded-lg border px-3 py-2" />
-          <textarea id="notes" placeholder="Notes (end‑use, export, delivery)" class="rounded-lg border px-3 py-2 h-28"></textarea>
-          <textarea id="selected" readonly class="rounded-lg border px-3 py-2 h-28" placeholder="Selected line items will appear here"></textarea>
+        <!-- To send via Formspree: add action="https://formspree.io/f/XXXX" method="POST" and remove onsubmit -->
+        <form id="rfqForm" class="mt-6 grid gap-3" onsubmit="event.preventDefault(); submitQuote();">
+          <input required name="name" id="name" placeholder="Name" class="rounded-lg border px-3 py-2" />
+          <input required name="email" id="email" type="email" placeholder="Email" class="rounded-lg border px-3 py-2" />
+          <input name="phone" id="phone" placeholder="Phone" class="rounded-lg border px-3 py-2" />
+          <textarea name="notes" id="notes" placeholder="Notes (end-use, export, delivery)" class="rounded-lg border px-3 py-2 h-28"></textarea>
+          <textarea id="selected" readonly class="rounded-lg border px-3 py-2 h-32" placeholder="Selected line items will appear here"></textarea>
+          <input type="hidden" name="selected_items" id="selected_items" />
           <button class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 w-max">Send</button>
           <p id="formStatus" class="text-sm text-green-700 hidden">Sent. We’ll be in touch.</p>
         </form>
@@ -108,8 +118,8 @@
       <aside class="bg-gray-50 rounded-xl p-6 border">
         <h3 class="font-semibold">Why buy from us?</h3>
         <ul class="mt-3 list-disc pl-5 text-sm text-gray-700 space-y-1">
-          <li>Trusted, quality‑assured supplier</li>
-          <li>Export compliance & end‑user screening</li>
+          <li>Trusted, quality-assured supplier</li>
+          <li>Export compliance & end-user screening</li>
           <li>Rapid AOG response</li>
           <li>Global logistics support</li>
         </ul>
@@ -129,24 +139,13 @@
     </div>
   </footer>
 
+  <!-- CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
-    // ---- demo inventory data (replace with CSV/JSON feed) ----
-    const INVENTORY = [
-      { pn:"1-984-1", nsn:"", alt:"", desc:"CONNECTOR", cond:"NS", qty:2 },
-      { pn:"10-0021", nsn:"", alt:"", desc:"KNOB", cond:"NS", qty:2 },
-      { pn:"10-0045", nsn:"", alt:"", desc:"BRACKET", cond:"NS", qty:6 },
-      { pn:"10-0053", nsn:"", alt:"", desc:"STOP", cond:"NS", qty:3 },
-      { pn:"10-0068", nsn:"", alt:"", desc:"RETAINER", cond:"NS", qty:17 },
-      { pn:"10-0069", nsn:"", alt:"", desc:"SHAFT", cond:"NS", qty:4 },
-      { pn:"10-0071-1", nsn:"1680-00-919-8571", alt:"", desc:"HOUSING, QUADRANT", cond:"NS", qty:2 },
-      { pn:"10-0082", nsn:"", alt:"", desc:"COVER KNOB", cond:"NS", qty:3 },
-      { pn:"10-0085", nsn:"", alt:"", desc:"BUTTON, DETENT", cond:"NS", qty:2 },
-      { pn:"10-0090", nsn:"2995-00-910-1347", alt:"", desc:"STOP", cond:"NS", qty:5 },
-      { pn:"10-1000-2", nsn:"2995-00-676-4015", alt:"", desc:"CONTROL", cond:"RP", qty:3 },
-      { pn:"10-1013", nsn:"1680-00-918-3396", alt:"", desc:"LEVER", cond:"NS", qty:10 },
-      { pn:"10-1018", nsn:"5340-00-471-0863", alt:"", desc:"BRACKET", cond:"NS", qty:2 }
-    ];
+    // ====== CONFIG: Google Sheets CSV URL ======
+    const DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pub?output=csv';
 
+    // DOM refs
     const rows = document.getElementById('rows');
     const q = document.getElementById('q');
     const cond = document.getElementById('cond');
@@ -156,25 +155,60 @@
     const exportBtn = document.getElementById('exportSel');
     const selectedBox = document.getElementById('selected');
 
-    const state = { sel: new Set() };
+    // state
+    let INVENTORY = [];
+    const state = { sel: new Set(), rowMap: new Map() }; // key -> row
 
-    function render() {
-      const term = (q.value || '').toLowerCase();
-      const c = cond.value;
-      const mq = Number(minqty.value || 0);
+    // map CSV headers to internal keys
+    function normalizeRow(r){
+      const get = (obj, ...keys) => keys.find(k => Object.prototype.hasOwnProperty.call(obj,k) && obj[k] !== '') || null;
+      const val = k => (k && r[k]!==undefined) ? String(r[k]).trim() : '';
+      const toNum = x => { const n = parseInt((x||'').toString().replace(/[^0-9-]/g,''),10); return isNaN(n)?0:n; };
 
-      const filtered = INVENTORY.filter(r => {
-        const hit = [r.pn, r.nsn, r.alt, r.desc].some(v => (v||'').toLowerCase().includes(term));
+      const pnK   = get(r,'pn','PN','PartNumber','PARTNUMBER');
+      const nsnK  = get(r,'nsn','NSN');
+      const altK  = get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
+      const descK = get(r,'desc','DESC','Description','DESCRIPTION');
+      const condK = get(r,'cond','COND','Condition','CONDITIONCD');
+      const qtyK  = get(r,'qty','Qty','QUANTITY');
+      const cageK = get(r,'cage','CAGE');
+      const uomK  = get(r,'uom','UOM','UnitOfMeasure','UNITOFMEASURE');
+      const priceK= get(r,'price','PRICE');
+
+      return {
+        pn:   val(pnK),
+        nsn:  val(nsnK),
+        alt:  val(altK),
+        desc: val(descK),
+        cond: val(condK),
+        qty:  toNum(val(qtyK)),
+        cage: val(cageK),
+        uom:  val(uomK),
+        price: val(priceK)
+      };
+    }
+
+    function render(){
+      const term = (q?.value || '').toLowerCase();
+      const c = cond?.value || '';
+      const mq = Number(minqty?.value || 0);
+
+      const filtered = (INVENTORY||[]).filter(r => {
+        const hay = [r.pn, r.nsn, r.alt, r.desc, r.cage].join(' ').toLowerCase();
+        const hit = hay.includes(term);
         const condOk = !c || r.cond === c;
-        const qtyOk = (r.qty||0) >= mq;
+        const qtyOk = (Number(r.qty)||0) >= mq;
         return hit && condOk && qtyOk;
       });
 
       rows.innerHTML = '';
-      filtered.forEach((r, i) => {
+      state.rowMap.clear();
+
+      filtered.forEach(r => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50';
-        const key = r.pn + '|' + r.nsn;
+        const key = (r.pn||'') + '|' + (r.nsn||'');
+        state.rowMap.set(key, r);
         const checked = state.sel.has(key) ? 'checked' : '';
         tr.innerHTML = `
           <td class="p-3 align-top"><input type="checkbox" data-key="${key}" ${checked} class="accent-blue-600"/></td>
@@ -183,9 +217,13 @@
           <td class="p-3">${r.alt || ''}</td>
           <td class="p-3">${r.desc || ''}</td>
           <td class="p-3">${r.cond || ''}</td>
-          <td class="p-3">${r.qty ?? ''}</td>`;
+          <td class="p-3">${r.qty ?? ''}</td>
+          <td class="p-3">${r.cage || ''}</td>
+          <td class="p-3">${r.uom || ''}</td>
+          <td class="p-3">${r.price || ''}</td>`;
         rows.appendChild(tr);
       });
+
       count.textContent = `${filtered.length} line item(s)`;
 
       rows.querySelectorAll('input[type="checkbox"]').forEach(cb => {
@@ -199,42 +237,62 @@
       updateSelectedBox();
     }
 
-    function updateSelectedBox(){
-      const selected = Array.from(state.sel).map(k => {
-        const [pn, nsn] = k.split('|');
-        return { pn, nsn };
-      });
-      selectedBox.value = selected.map(s => `${s.pn}${s.nsn?` (NSN ${s.nsn})`:''}`).join('\n');
+    function formatSelectedLine(r){
+      const parts = [
+        r.pn ? `PN ${r.pn}` : '',
+        r.desc || '',
+        r.cond ? `Cond ${r.cond}` : '',
+        (r.qty || r.qty === 0) ? `Qty ${r.qty}` : '',
+        r.cage ? `CAGE ${r.cage}` : '',
+        r.uom ? `UoM ${r.uom}` : '',
+        r.price ? `Price ${r.price}` : '',
+        r.nsn ? `NSN ${r.nsn}` : ''
+      ].filter(Boolean);
+      return parts.join(' | ');
     }
 
-    q.addEventListener('input', render);
-    cond.addEventListener('change', render);
-    minqty.addEventListener('input', render);
-    clearBtn.addEventListener('click', () => { q.value=''; cond.value=''; minqty.value=''; state.sel.clear(); render(); });
-    exportBtn.addEventListener('click', () => {
-      if (!state.sel.size) { alert('Select at least one line.'); return; }
+    function updateSelectedBox(){
+      const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
+      const text = selected.map(formatSelectedLine).join('\n');
+      if (selectedBox) selectedBox.value = text;
+      const hidden = document.getElementById('selected_items'); if (hidden) hidden.value = text;
+    }
+
+    function submitQuote(){
+      // Demo submission; replace with real form action to send
+      document.getElementById('formStatus').classList.remove('hidden');
+      setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 3000);
+    }
+
+    function loadData(){
+      Papa.parse(DATA_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: false,
+        complete: (r)=>{ INVENTORY = r.data.map(normalizeRow); render(); }
+      });
+    }
+
+    q?.addEventListener('input', render);
+    cond?.addEventListener('change', render);
+    minqty?.addEventListener('input', render);
+    clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
+    exportBtn?.addEventListener('click', () => {
+      if (!state.sel.size) { alert('Select at least one line."); return; }
       document.getElementById('quote').scrollIntoView({ behavior:'smooth' });
     });
 
-    function submitQuote(){
-      // Demo only: replace with your POST to backend or Formspree endpoint
-      document.getElementById('formStatus').classList.remove('hidden');
-      setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 4000);
-    }
-
     document.getElementById('yr').textContent = new Date().getFullYear();
-    render();
+    loadData();
   </script>
 
-  <!-- Structured data: ItemList of Products (basic) -->
+  <!-- Structured data: ItemList (basic) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "itemListElement": [
-      {"@type":"Product","name":"1-984-1","mpn":"1-984-1","category":"Aircraft part","description":"CONNECTOR"},
-      {"@type":"Product","name":"10-0021","mpn":"10-0021","category":"Aircraft part","description":"KNOB"}
-    ]
+    "itemListElement": []
   }
   </script>
 </body>
