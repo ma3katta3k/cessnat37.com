@@ -129,257 +129,120 @@
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script>
-    // Load inventory from Google Sheets CSV
-    const DATA_URL = '/api/t37';
-  
-    // Function to normalize row data
-    function normalizeRow(r){
-      const get = (obj, ...keys) => keys.find(k => Object.prototype.hasOwnProperty.call(obj,k) && obj[k] !== '') || null;
-      const val = k => (k && r[k]!==undefined) ? String(r[k]).trim() : '';
-      const toNum = x => { const n = parseInt((x||'').toString().replace(/[^0-9-]/g,''),10); return isNaN(n)?0:n; };
-    
-      const pnK   = get(r,'pn','PN','PartNumber','PARTNUMBER');
-      const nsnK  = get(r,'nsn','NSN');
-      const altK  = get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
-      const descK = get(r,'desc','DESC','Description','DESCRIPTION');
-      const condK = get(r,'cond','COND','Condition','CONDITIONCD');
-      const qtyK  = get(r,'qty','Qty','QUANTITY');
-    
-      return {
-        pn:   val(pnK),
-        nsn:  val(nsnK),
-        alt:  val(altK),
-        desc: val(descK),
-        cond: val(condK),
-        qty:  toNum(val(qtyK))
-      };
-    }
-  
-    // Function to render the table based on current filters
-    function render(){
-      const term = (q?.value || '').toLowerCase();
-      const c = cond?.value || '';
-      const mq = Number(minqty?.value || 0);
-  
-      const filtered = (INVENTORY||[]).filter(r => {
-        const hay = [r.pn, r.nsn, r.alt, r.desc].join(' ').toLowerCase();
-        const hit = hay.includes(term);
-        const condOk = !c || r.cond === c;
-        const qtyOk = (Number(r.qty)||0) >= mq;
-        return hit && condOk && qtyOk;
-      });
-  
-      rows.innerHTML = '';
-      state.rowMap.clear();
-  
-      filtered.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50';
-        const key = (r.pn||'') + '|' + (r.nsn||'');
-        state.rowMap.set(key, r);
-        const checked = state.sel.has(key) ? 'checked' : '';
-        tr.innerHTML = `
-          <td class="p-3 align-top"><input type="checkbox" data-key="${key}" ${checked} class="accent-blue-600"/></td>
-          <td class="p-3 sticky-col font-medium">${r.pn || ''}</td>
-          <td class="p-3">${r.nsn || ''}</td>
-          <td class="p-3">${r.alt || ''}</td>
-          <td class="p-3">${r.desc || ''}</td>
-          <td class="p-3">${r.cond || ''}</td>
-          <td class="p-3">${r.qty ?? ''}</td>`;
-        rows.appendChild(tr);
-      });
-      count.textContent = `${filtered.length} line item(s)`;
-  
-      rows.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', e => {
-          const k = e.target.getAttribute('data-key');
-          if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
-          updateSelectedBox();
-        });
-      });
-  
-      updateSelectedBox();
-    }
-  
-    // Function to update the selected items box
-    function updateSelectedBox(){
-      const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
-      const text = selected.map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`).join('\n');
-      if (selectedBox) selectedBox.value = text;
-    }
-  
-    // Function to submit the quote form
-    function submitQuote(){
-      document.getElementById('formStatus').classList.remove('hidden');
-      setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 4000);
-    }
-  
-    // Function to load data from the server
-    function loadData(){
-      Papa.parse(DATA_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: false,
-        complete: (r) => {
-          INVENTORY = r.data.map(normalizeRow);
-          render();
-        },
-        error: (err) => {
-          console.error('Error loading data:', err);
-          count.textContent = 'Failed to load data. Please try again later.';
-        }
-      });
-    }
-  
-    // Event listeners for form inputs and buttons
-    q?.addEventListener('input', render);
-    cond?.addEventListener('change', render);
-    minqty?.addEventListener('input', render);
-    clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
-    exportBtn?.addEventListener('click', () => {
-      if (!state.sel.size) { alert('Select at least one line.'); return; }
-      document.getElementById('quote').scrollIntoView({ behavior:'smooth' });
-    });
-  
-    // Set the current year in the footer
-    document.getElementById('yr').textContent = new Date().getFullYear();
-    loadData();
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+  // ====== DATA SOURCE (via Pages Function proxy to Sheets) ======
+  const DATA_URL = '/api/t37';
 
+  // ====== DOM REFS ======
+  const rows = document.getElementById('rows');
+  const q = document.getElementById('q');
+  const cond = document.getElementById('cond');
+  const minqty = document.getElementById('minqty');
+  const count = document.getElementById('count');
+  const clearBtn = document.getElementById('clear');
+  const exportBtn = document.getElementById('exportSel');
+  const selectedBox = document.getElementById('selected');
 
-    let INVENTORY = [];
+  // ====== STATE ======
+  let INVENTORY = [];
+  const state = { sel: new Set(), rowMap: new Map() };
 
-    const rows = document.getElementById('rows');
-    const q = document.getElementById('q');
-    const cond = document.getElementById('cond');
-    const minqty = document.getElementById('minqty');
-    const count = document.getElementById('count');
-    const clearBtn = document.getElementById('clear');
-    const exportBtn = document.getElementById('exportSel');
-    const selectedBox = document.getElementById('selected');
+  // ====== HELPERS ======
+  function normalizeRow(r){
+    const get = (obj, ...keys) => keys.find(k => Object.prototype.hasOwnProperty.call(obj,k) && obj[k] !== '') || null;
+    const val = k => (k && r[k]!==undefined) ? String(r[k]).trim() : '';
+    const toNum = x => { const n = parseInt((x||'').toString().replace(/[^0-9-]/g,''),10); return isNaN(n)?0:n; };
 
-    const state = { sel: new Set(), rowMap: new Map() };
+    const pnK   = get(r,'pn','PN','PartNumber','PARTNUMBER');
+    const nsnK  = get(r,'nsn','NSN');
+    const altK  = get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
+    const descK = get(r,'desc','DESC','Description','DESCRIPTION');
+    const condK = get(r,'cond','COND','Condition','CONDITIONCD');
+    const qtyK  = get(r,'qty','Qty','QUANTITY');
 
-    function normalizeRow(r){
-      const get = (obj, ...keys) => keys.find(k => Object.prototype.hasOwnProperty.call(obj,k) && obj[k] !== '') || null;
-      const val = k => (k && r[k]!==undefined) ? String(r[k]).trim() : '';
-      const toNum = x => { const n = parseInt((x||'').toString().replace(/[^0-9-]/g,''),10); return isNaN(n)?0:n; };
-
-      const pnK   = get(r,'pn','PN','PartNumber','PARTNUMBER');
-      const nsnK  = get(r,'nsn','NSN');
-      const altK  = get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
-      const descK = get(r,'desc','DESC','Description','DESCRIPTION');
-      const condK = get(r,'cond','COND','Condition','CONDITIONCD');
-      const qtyK  = get(r,'qty','Qty','QUANTITY');
-
-      return {
-        pn:   val(pnK),
-        nsn:  val(nsnK),
-        alt:  val(altK),
-        desc: val(descK),
-        cond: val(condK),
-        qty:  toNum(val(qtyK))
-      };
-    }
-
-    function render(){
-      const term = (q?.value || '').toLowerCase();
-      const c = cond?.value || '';
-      const mq = Number(minqty?.value || 0);
-
-      const filtered = (INVENTORY||[]).filter(r => {
-        const hay = [r.pn, r.nsn, r.alt, r.desc].join(' ').toLowerCase();
-        const hit = hay.includes(term);
-        const condOk = !c || r.cond === c;
-        const qtyOk = (Number(r.qty)||0) >= mq;
-        return hit && condOk && qtyOk;
-      });
-
-      rows.innerHTML = '';
-      state.rowMap.clear();
-
-      filtered.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50';
-        const key = (r.pn||'') + '|' + (r.nsn||'');
-        state.rowMap.set(key, r);
-        const checked = state.sel.has(key) ? 'checked' : '';
-        tr.innerHTML = `
-          <td class="p-3 align-top"><input type="checkbox" data-key="${key}" ${checked} class="accent-blue-600"/></td>
-          <td class="p-3 sticky-col font-medium">${r.pn || ''}</td>
-          <td class="p-3">${r.nsn || ''}</td>
-          <td class="p-3">${r.alt || ''}</td>
-          <td class="p-3">${r.desc || ''}</td>
-          <td class="p-3">${r.cond || ''}</td>
-          <td class="p-3">${r.qty ?? ''}</td>`;
-        rows.appendChild(tr);
-      });
-      count.textContent = `${filtered.length} line item(s)`;
-
-      rows.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', e => {
-          const k = e.target.getAttribute('data-key');
-          if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
-          updateSelectedBox();
-        });
-      });
-
-      updateSelectedBox();
-    }
-
-    function updateSelectedBox(){
-      const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
-      const text = selected.map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`).join('\n');
-      if (selectedBox) selectedBox.value = text;
-    }
-
-    function submitQuote(){
-      document.getElementById('formStatus').classList.remove('hidden');
-      setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 4000);
-    }
-
-    function loadData(){
-      Papa.parse(DATA_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: false,
-        complete: (r) => {
-          INVENTORY = r.data.map(normalizeRow);
-          render();
-        },
-        error: (err) => {
-          console.error('Error loading data:', err);
-          count.textContent = 'Failed to load data. Please try again later.';
-        }
-      });
-    }
-
-    q?.addEventListener('input', render);
-    cond?.addEventListener('change', render);
-    minqty?.addEventListener('input', render);
-    clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
-    exportBtn?.addEventListener('click', () => {
-      if (!state.sel.size) { alert('Select at least one line.'); return; }
-      document.getElementById('quote').scrollIntoView({ behavior:'smooth' });
-    });
-
-    document.getElementById('yr').textContent = new Date().getFullYear();
-    loadData();
-  </script>
-
-  <!-- Structured data: ItemList of Products (basic) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "itemListElement": [
-      {"@type":"Product","name":"1-984-1","mpn":"1-984-1","category":"Aircraft part","description":"CONNECTOR"},
-      {"@type":"Product","name":"10-0021","mpn":"10-0021","category":"Aircraft part","description":"KNOB"}
-    ]
+    return {
+      pn:   val(pnK),
+      nsn:  val(nsnK),
+      alt:  val(altK),
+      desc: val(descK),
+      cond: val(condK),
+      qty:  toNum(val(qtyK))
+    };
   }
-  </script>
-</body>
-</html>
+
+  function render(){
+    const term = (q?.value || '').toLowerCase();
+    const c = cond?.value || '';
+    const mq = Number(minqty?.value || 0);
+
+    const filtered = (INVENTORY||[]).filter(r => {
+      const hay = [r.pn, r.nsn, r.alt, r.desc].join(' ').toLowerCase();
+      const hit = hay.includes(term);
+      const condOk = !c || r.cond === c;
+      const qtyOk = (Number(r.qty)||0) >= mq;
+      return hit && condOk && qtyOk;
+    });
+
+    rows.innerHTML = '';
+    state.rowMap.clear();
+
+    filtered.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-gray-50';
+      const key = (r.pn||'') + '|' + (r.nsn||'');
+      state.rowMap.set(key, r);
+      const checked = state.sel.has(key) ? 'checked' : '';
+      tr.innerHTML = `
+        <td class="p-3 align-top"><input type="checkbox" data-key="${key}" ${checked} class="accent-blue-600"/></td>
+        <td class="p-3 sticky-col font-medium">${r.pn || ''}</td>
+        <td class="p-3">${r.nsn || ''}</td>
+        <td class="p-3">${r.alt || ''}</td>
+        <td class="p-3">${r.desc || ''}</td>
+        <td class="p-3">${r.cond || ''}</td>
+        <td class="p-3">${r.qty ?? ''}</td>`;
+      rows.appendChild(tr);
+    });
+    count.textContent = `${filtered.length} line item(s)`;
+
+    rows.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const k = e.target.getAttribute('data-key');
+        if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
+        updateSelectedBox();
+      });
+    });
+
+    updateSelectedBox();
+  }
+
+  function updateSelectedBox(){
+    const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
+    const text = selected.map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`).join('\n');
+    if (selectedBox) selectedBox.value = text;
+  }
+
+  function loadData(){
+    Papa.parse(DATA_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: false,
+      complete: (r) => { INVENTORY = r.data.map(normalizeRow); render(); },
+      error: (err) => { console.error('Error loading data:', err); count.textContent = 'Failed to load data.'; }
+    });
+  }
+
+  // ====== WIRE UP ======
+  q?.addEventListener('input', render);
+  cond?.addEventListener('change', render);
+  minqty?.addEventListener('input', render);
+  clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
+  exportBtn?.addEventListener('click', () => {
+    if (!state.sel.size) { alert('Select at least one line.'); return; }
+    document.getElementById('quote').scrollIntoView({ behavior:'smooth' });
+  });
+
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  loadData();
+</script>
