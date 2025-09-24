@@ -36,7 +36,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <label class="block">
         <span class="text-sm font-medium">Search</span>
-        <input id="q" type="search" placeholder="Part #, NSN, Desc…" class="mt-1 w-full rounded-lg border px-3 py-2"/>
+        <input id="q" type="search" placeholder="Part #, NSN, Desc…" class="mt-1 w-full rounded-lg border px-3 py-2" aria-label="Search" />
       </label>
       <label class="block">
         <span class="text-sm font-medium">Condition</span>
@@ -50,7 +50,7 @@
         <input id="minqty" type="number" min="0" class="mt-1 w-full rounded-lg border px-3 py-2"/>
       </label>
       <div class="flex items-end gap-2">
-        <button id="clear" class="rounded-lg border px-3 py-2" type="button">Clear</button>
+        <button id="clear" class="rounded-lg border px-3 py-2" type="button" aria-label="Clear Filters">Clear</button>
       </div>
     </div>
   </section>
@@ -78,100 +78,144 @@
   <!-- CSV parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
-  (function () {
-    // ========= CONFIG =========
-    var DATA_URL = '/inventory/t37.csv';   // local CSV file (must exist)
+    // Configuration
+    const DATA_URL = '/inventory/t37.csv'; // CSV file URL
 
-    // ========= DOM =========
-    var rows   = document.getElementById('rows');
-    var q      = document.getElementById('q');
-    var cond   = document.getElementById('cond');
-    var minqty = document.getElementById('minqty');
-    var count  = document.getElementById('count');
-    var clear  = document.getElementById('clear');
+    // DOM elements
+    const rows = document.getElementById('rows');
+    const q = document.getElementById('q');
+    const cond = document.getElementById('cond');
+    const minqty = document.getElementById('minqty');
+    const count = document.getElementById('count');
+    const clear = document.getElementById('clear');
 
-    // Show any JS error inline so we don't get stuck on "Loading…"
-    window.onerror = function (msg) { if (count) count.textContent = 'Error: ' + msg; };
+    // Global error handler
+    window.onerror = (msg) => {
+      if (count) {
+        count.textContent = `Error: ${msg}`;
+      }
+    };
 
-    var inventory = [];
+    let inventory = [];
 
-    // Map flexible CSV headers -> our keys
-    function normalizeRow(r){
-      function has(o, k){ return Object.prototype.hasOwnProperty.call(o, k) && o[k] !== ''; }
-      function val(v){ return v == null ? '' : String(v).trim(); }
-      function num(v){ var m = String(v || '').replace(/[^0-9-]/g, ''); return m ? parseInt(m, 10) : 0; }
+    // Utility function to sanitize input
+    const sanitize = (str) => {
+      return str.replace(/[^\w. ]/gi, function (c) {
+        return '&#' + c.charCodeAt(0) + ';';
+      });
+    };
 
-      var pn   = has(r,'pn')   ? r.pn   : (has(r,'PARTNUMBER') ? r.PARTNUMBER : '');
-      var nsn  = has(r,'nsn')  ? r.nsn  : (has(r,'NSN') ? r.NSN : '');
-      var alt  = has(r,'alt')  ? r.alt  : (has(r,'ALTERNATEPARTNUMBER') ? r.ALTERNATEPARTNUMBER : '');
-      var desc = has(r,'desc') ? r.desc : (has(r,'DESCRIPTION') ? r.DESCRIPTION : '');
-      var cond = has(r,'cond') ? r.cond : (has(r,'CONDITIONCD') ? r.CONDITIONCD : '');
-      var qty  = has(r,'qty')  ? r.qty  : (has(r,'QUANTITY') ? r.QUANTITY : '');
+    // Normalize CSV headers
+    const normalizeRow = (r) => {
+      const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k) && o[k] !== '';
+      const val = (v) => (v == null ? '' : sanitize(String(v).trim()));
+      const num = (v) => {
+        const m = String(v || '').replace(/[^0-9-]/g, '');
+        return m ? parseInt(m, 10) : 0;
+      };
 
-      return { pn: val(pn), nsn: val(nsn), alt: val(alt), desc: val(desc), cond: val(cond), qty: num(qty) };
-    }
+      const pn = has(r, 'pn') ? r.pn : has(r, 'PARTNUMBER') ? r.PARTNUMBER : '';
+      const nsn = has(r, 'nsn') ? r.nsn : has(r, 'NSN') ? r.NSN : '';
+      const alt = has(r, 'alt') ? r.alt : has(r, 'ALTERNATEPARTNUMBER') ? r.ALTERNATEPARTNUMBER : '';
+      const desc = has(r, 'desc') ? r.desc : has(r, 'DESCRIPTION') ? r.DESCRIPTION : '';
+      const cond = has(r, 'cond') ? r.cond : has(r, 'CONDITIONCD') ? r.CONDITIONCD : '';
+      const qty = has(r, 'qty') ? r.qty : has(r, 'QUANTITY') ? r.QUANTITY : '';
 
-    function render(){
-      var term = (q && q.value ? q.value : '').toLowerCase();
-      var c    = (cond && cond.value ? cond.value : '');
-      var mq   = Number(minqty && minqty.value ? minqty.value : 0);
+      return {
+        pn: val(pn),
+        nsn: val(nsn),
+        alt: val(alt),
+        desc: val(desc),
+        cond: val(cond),
+        qty: num(qty),
+      };
+    };
 
-      var filtered = inventory.filter(function(r){
-        var hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
-        var hit = hay.indexOf(term) !== -1;
-        var condOk = !c || r.cond === c;
-        var qtyOk = (r.qty || 0) >= mq;
+    // Render table rows
+    const render = () => {
+      const term = (q && q.value ? q.value : '').toLowerCase();
+      const c = cond && cond.value ? cond.value : '';
+      const mq = Number(minqty && minqty.value ? minqty.value : 0);
+
+      const filtered = inventory.filter((r) => {
+        const hay = `${r.pn} ${r.nsn} ${r.alt} ${r.desc}`.toLowerCase();
+        const hit = hay.includes(term);
+        const condOk = !c || r.cond === c;
+        const qtyOk = (r.qty || 0) >= mq;
         return hit && condOk && qtyOk;
       });
 
       rows.innerHTML = '';
-      for (var i=0; i<filtered.length; i++){
-        var r = filtered[i];
-        var tr = document.createElement('tr');
+      filtered.forEach((r) => {
+        const tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50';
 
-        var cells = [
-          { cls:'p-3 sticky-col font-medium', text:r.pn || '' },
-          { cls:'p-3', text:r.nsn || '' },
-          { cls:'p-3', text:r.alt || '' },
-          { cls:'p-3', text:r.desc || '' },
-          { cls:'p-3', text:r.cond || '' },
-          { cls:'p-3', text:String(r.qty != null ? r.qty : '') }
+        const cells = [
+          { cls: 'p-3 sticky-col font-medium', text: r.pn || '' },
+          { cls: 'p-3', text: r.nsn || '' },
+          { cls: 'p-3', text: r.alt || '' },
+          { cls: 'p-3', text: r.desc || '' },
+          { cls: 'p-3', text: r.cond || '' },
+          { cls: 'p-3', text: String(r.qty != null ? r.qty : '') },
         ];
-        for (var j=0; j<cells.length; j++){
-          var td = document.createElement('td');
-          td.className = cells[j].cls;
-          td.textContent = cells[j].text;
+
+        cells.forEach((cell) => {
+          const td = document.createElement('td');
+          td.className = cell.cls;
+          td.textContent = cell.text;
           tr.appendChild(td);
-        }
+        });
+
         rows.appendChild(tr);
-      }
+      });
 
-      count.textContent = filtered.length + ' line item(s)';
-    }
+      count.textContent = `${filtered.length} line item(s)`;
+    };
 
-    function loadData(){
-      var url = DATA_URL + (DATA_URL.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now(); // cache-bust
+    // Load data from CSV
+    const loadData = () => {
+      const url = `${DATA_URL}${DATA_URL.indexOf('?') > -1 ? '&' : '?'}t=${Date.now()}`; // cache-bust
       fetch(url, { cache: 'no-store' })
-        .then(function (res) { if (!res.ok) throw new Error('CSV HTTP ' + res.status); return res.text(); })
-        .then(function (text) {
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`CSV HTTP ${res.status}`);
+          }
+          return res.text();
+        })
+        .then((text) => {
           Papa.parse(text, {
             header: true,
             skipEmptyLines: true,
             dynamicTyping: false,
-            complete: function (r) { inventory = r.data.map(normalizeRow); render(); }
+            complete: (r) => {
+              inventory = r.data.map(normalizeRow);
+              render();
+            },
+            error: (error) => {
+              console.error('CSV parsing error:', error);
+              count.textContent = `Failed to parse CSV: ${error.message}`;
+            },
           });
         })
-        .catch(function (err) { console.error(err); if (count) count.textContent = 'Failed to load data: ' + err.message; });
-    }
+        .catch((err) => {
+          console.error(err);
+          count.textContent = `Failed to load data: ${err.message}`;
+        });
+    };
 
-    if (q) q.addEventListener('input', render);
-    if (cond) cond.addEventListener('change', render);
-    if (minqty) minqty.addEventListener('input', render);
-    if (clear) clear.addEventListener('click', function(){ if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; render(); });
+    // Event listeners
+    q?.addEventListener('input', render);
+    cond?.addEventListener('change', render);
+    minqty?.addEventListener('input', render);
+    clear?.addEventListener('click', () => {
+      if (q) q.value = '';
+      if (cond) cond.value = '';
+      if (minqty) minqty.value = '';
+      render();
+    });
 
+    // Load data on page load
     loadData();
-  })();
   </script>
 </body>
 </html>
