@@ -4,17 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cessna T-37 Aircraft Spares</title>
+  <meta name="description" content="Cessna T-37 aircraft spares list with search & filters.">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .sticky-col{position:sticky;left:0;background:#fff;box-shadow:1px 0 0 #e5e7eb}
     .tg td,.tg th{border-bottom:1px solid #e5e7eb}
-    .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
   <header class="bg-white border-b">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
       <h1 class="text-2xl font-bold">Cessna T-37 Aircraft Spares</h1>
+      <p class="text-sm text-gray-600 mt-1">Browse inventory. Use search & filters.</p>
     </div>
   </header>
 
@@ -28,7 +29,8 @@
       <label class="block">
         <span class="text-sm font-medium">Condition</span>
         <select id="cond" class="mt-1 w-full rounded-lg border px-3 py-2">
-          <option value="">All</option><option>NS</option><option>SV</option><option>OH</option><option>AR</option><option>RP</option>
+          <option value="">All</option>
+          <option>NS</option><option>SV</option><option>OH</option><option>AR</option><option>RP</option>
         </select>
       </label>
       <label class="block">
@@ -65,50 +67,23 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
   (() => {
-    const DATA_URL = '/inventory/t37.csv'; // local CSV
+    const DATA_URL = '/inventory/t37.csv'; // local CSV (make sure this file exists)
 
     // DOM
-    const rows = document.getElementById('rows');
-    const q = document.getElementById('q');
-    const cond = document.getElementById('cond');
+    const rows   = document.getElementById('rows');
+    const q      = document.getElementById('q');
+    const cond   = document.getElementById('cond');
     const minqty = document.getElementById('minqty');
-    const count = document.getElementById('count');
-    const clearBtn = document.getElementById('clear');
+    const count  = document.getElementById('count');
+    const clear  = document.getElementById('clear');
 
-    // show any JS error in the UI
-    window.onerror = (msg) => { count.textContent = 'Error: ' + msg; };
+    // Surface any JS error in the UI
+    window.onerror = (msg) => { if (count) count.textContent = 'Error: ' + msg; };
 
-    let INVENTORY = [];
+    let inventory = [];
 
-    function render(){
-      const term = (q?.value || '').toLowerCase();
-      const c = cond?.value || '';
-      const mq = Number(minqty?.value || 0);
-
-      const filtered = INVENTORY.filter(r => {
-        const hay = [r.pn, r.nsn, r.alt, r.desc].join(' ').toLowerCase();
-        return hay.includes(term) && (!c || r.cond === c) && ((r.qty||0) >= mq);
-      });
-
-      rows.innerHTML = '';
-      filtered.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50';
-        tr.innerHTML = `
-          <td class="p-3 sticky-col font-medium">${r.pn || ''}</td>
-          <td class="p-3">${r.nsn || ''}</td>
-          <td class="p-3">${r.alt || ''}</td>
-          <td class="p-3">${r.desc || ''}</td>
-          <td class="p-3">${r.cond || ''}</td>
-          <td class="p-3">${r.qty ?? ''}</td>`;
-        rows.appendChild(tr);
-      });
-
-      count.textContent = `${filtered.length} line item(s)`;
-    }
-
+    // Support either simple headers (pn,nsn,alt,desc,cond,qty) or ERP headers
     function normalizeRow(r){
-      // supports either simple headers (pn,desc,…) or your ERP names
       const get = (o,...k)=>k.find(x=>Object.prototype.hasOwnProperty.call(o,x) && o[x] !== '')||null;
       const s = v => (v==null ? '' : String(v).trim());
       const n = v => { const m = String(v||'').replace(/[^0-9-]/g,''); return m ? parseInt(m,10) : 0; };
@@ -121,32 +96,63 @@
       const qtyK  = get(r,'qty','Qty','QUANTITY');
 
       return {
-        pn:   s(pnK ? r[pnK]   : r.pn),
-        nsn:  s(nsnK? r[nsnK]  : r.nsn),
-        alt:  s(altK? r[altK]  : r.alt),
-        desc: s(descK? r[descK]: r.desc),
-        cond: s(condK? r[condK]: r.cond),
-        qty:  n(qtyK?  r[qtyK] : r.qty)
+        pn:   s(pnK   ? r[pnK]   : r.pn),
+        nsn:  s(nsnK  ? r[nsnK]  : r.nsn),
+        alt:  s(altK  ? r[altK]  : r.alt),
+        desc: s(descK ? r[descK] : r.desc),
+        cond: s(condK ? r[condK] : r.cond),
+        qty:  n(qtyK  ? r[qtyK]  : r.qty)
       };
+    }
+
+    function render(){
+      const term = (q?.value || '').toLowerCase();
+      const c    = cond?.value || '';
+      const mq   = Number(minqty?.value || 0);
+
+      const filtered = inventory.filter(r => {
+        const hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
+        return hay.includes(term) && (!c || r.cond === c) && ((r.qty||0) >= mq);
+      });
+
+      rows.innerHTML = '';
+      for (const r of filtered){
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+
+        const tdPN  = document.createElement('td'); tdPN.className  = 'p-3 sticky-col font-medium'; tdPN.textContent  = r.pn || '';
+        const tdNSN = document.createElement('td'); tdNSN.className = 'p-3'; tdNSN.textContent = r.nsn || '';
+        const tdAlt = document.createElement('td'); tdAlt.className = 'p-3'; tdAlt.textContent = r.alt || '';
+        const tdDes = document.createElement('td'); tdDes.className = 'p-3'; tdDes.textContent = r.desc || '';
+        const tdCon = document.createElement('td'); tdCon.className = 'p-3'; tdCon.textContent = r.cond || '';
+        const tdQty = document.createElement('td'); tdQty.className = 'p-3'; tdQty.textContent = (r.qty ?? '').toString();
+
+        tr.appendChild(tdPN); tr.appendChild(tdNSN); tr.appendChild(tdAlt);
+        tr.appendChild(tdDes); tr.appendChild(tdCon); tr.appendChild(tdQty);
+        rows.appendChild(tr);
+      }
+
+      count.textContent = filtered.length + ' line item(s)';
     }
 
     function loadData(){
       const url = DATA_URL + (DATA_URL.includes('?') ? '&' : '?') + 't=' + Date.now(); // cache-bust
       fetch(url, { cache: 'no-store' })
-        .then(res => { if (!res.ok) throw new Error(`CSV HTTP ${res.status}`); return res.text(); })
+        .then(res => { if (!res.ok) throw new Error('CSV HTTP ' + res.status); return res.text(); })
         .then(text => {
           Papa.parse(text, {
             header: true, skipEmptyLines: true, dynamicTyping: false,
-            complete: (r)=>{ INVENTORY = r.data.map(normalizeRow); render(); }
+            complete: (r) => { inventory = r.data.map(normalizeRow); render(); }
           });
         })
         .catch(err => { console.error(err); count.textContent = 'Failed to load data: ' + err.message; });
     }
 
+    // events
     q?.addEventListener('input', render);
     cond?.addEventListener('change', render);
     minqty?.addEventListener('input', render);
-    clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; loadData(); });
+    clear?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; render(); });
 
     loadData();
   })();
