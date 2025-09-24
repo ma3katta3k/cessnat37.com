@@ -4,20 +4,32 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cessna T-37 Aircraft Spares</title>
-  <meta name="description" content="Cessna T-37 aircraft spares list with search & filters.">
+  <meta name="description" content="Browse in-stock and rotable T-37 spares. Search & filter, then request a quote." />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .sticky-col{position:sticky;left:0;background:#fff;box-shadow:1px 0 0 #e5e7eb}
     .tg td,.tg th{border-bottom:1px solid #e5e7eb}
+    .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
-  <header class="bg-white border-b">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
-      <h1 class="text-2xl font-bold">Cessna T-37 Aircraft Spares</h1>
-      <p class="text-sm text-gray-600 mt-1">Browse inventory. Use search & filters.</p>
+  <!-- Top bar -->
+  <header class="bg-white border-b sticky top-0 z-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-4">
+      <a href="/" class="font-semibold tracking-tight">Your Company</a>
+      <div class="ml-auto text-sm">sales@yourco.example · +353 00 000 0000</div>
     </div>
   </header>
+
+  <!-- Hero -->
+  <section class="bg-gray-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-white">
+      <h1 class="text-3xl sm:text-4xl font-bold">Cessna T-37 Aircraft Spares</h1>
+      <p class="mt-2 max-w-2xl text-white/90">
+        Browse in-stock and rotable inventory. Use search & filters, then send the selected lines for a fast quote.
+      </p>
+    </div>
+  </section>
 
   <!-- Filters -->
   <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
@@ -44,7 +56,7 @@
   </section>
 
   <!-- Table -->
-  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12" data-section="inventory-table">
     <div class="overflow-auto rounded-xl border bg-white">
       <table class="w-full tg" role="table" aria-label="Inventory list">
         <thead class="bg-gray-100 text-left text-sm">
@@ -66,69 +78,72 @@
   <!-- CSV parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
-  (() => {
-    const DATA_URL = '/inventory/t37.csv'; // local CSV (make sure this file exists)
+  (function () {
+    // ========= CONFIG =========
+    var DATA_URL = '/inventory/t37.csv';   // local CSV file (must exist)
 
-    // DOM
-    const rows   = document.getElementById('rows');
-    const q      = document.getElementById('q');
-    const cond   = document.getElementById('cond');
-    const minqty = document.getElementById('minqty');
-    const count  = document.getElementById('count');
-    const clear  = document.getElementById('clear');
+    // ========= DOM =========
+    var rows   = document.getElementById('rows');
+    var q      = document.getElementById('q');
+    var cond   = document.getElementById('cond');
+    var minqty = document.getElementById('minqty');
+    var count  = document.getElementById('count');
+    var clear  = document.getElementById('clear');
 
-    // Surface any JS error in the UI
-    window.onerror = (msg) => { if (count) count.textContent = 'Error: ' + msg; };
+    // Show any JS error inline so we don't get stuck on "Loading…"
+    window.onerror = function (msg) { if (count) count.textContent = 'Error: ' + msg; };
 
-    let inventory = [];
+    var inventory = [];
 
-    // Support either simple headers (pn,nsn,alt,desc,cond,qty) or ERP headers
+    // Map flexible CSV headers -> our keys
     function normalizeRow(r){
-      const get = (o,...k)=>k.find(x=>Object.prototype.hasOwnProperty.call(o,x) && o[x] !== '')||null;
-      const s = v => (v==null ? '' : String(v).trim());
-      const n = v => { const m = String(v||'').replace(/[^0-9-]/g,''); return m ? parseInt(m,10) : 0; };
+      function has(o, k){ return Object.prototype.hasOwnProperty.call(o, k) && o[k] !== ''; }
+      function val(v){ return v == null ? '' : String(v).trim(); }
+      function num(v){ var m = String(v || '').replace(/[^0-9-]/g, ''); return m ? parseInt(m, 10) : 0; }
 
-      const pnK   = get(r,'pn','PN','PartNumber','PARTNUMBER');
-      const nsnK  = get(r,'nsn','NSN');
-      const altK  = get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
-      const descK = get(r,'desc','DESC','Description','DESCRIPTION');
-      const condK = get(r,'cond','COND','Condition','CONDITIONCD');
-      const qtyK  = get(r,'qty','Qty','QUANTITY');
+      var pn   = has(r,'pn')   ? r.pn   : (has(r,'PARTNUMBER') ? r.PARTNUMBER : '');
+      var nsn  = has(r,'nsn')  ? r.nsn  : (has(r,'NSN') ? r.NSN : '');
+      var alt  = has(r,'alt')  ? r.alt  : (has(r,'ALTERNATEPARTNUMBER') ? r.ALTERNATEPARTNUMBER : '');
+      var desc = has(r,'desc') ? r.desc : (has(r,'DESCRIPTION') ? r.DESCRIPTION : '');
+      var cond = has(r,'cond') ? r.cond : (has(r,'CONDITIONCD') ? r.CONDITIONCD : '');
+      var qty  = has(r,'qty')  ? r.qty  : (has(r,'QUANTITY') ? r.QUANTITY : '');
 
-      return {
-        pn:   s(pnK   ? r[pnK]   : r.pn),
-        nsn:  s(nsnK  ? r[nsnK]  : r.nsn),
-        alt:  s(altK  ? r[altK]  : r.alt),
-        desc: s(descK ? r[descK] : r.desc),
-        cond: s(condK ? r[condK] : r.cond),
-        qty:  n(qtyK  ? r[qtyK]  : r.qty)
-      };
+      return { pn: val(pn), nsn: val(nsn), alt: val(alt), desc: val(desc), cond: val(cond), qty: num(qty) };
     }
 
     function render(){
-      const term = (q?.value || '').toLowerCase();
-      const c    = cond?.value || '';
-      const mq   = Number(minqty?.value || 0);
+      var term = (q && q.value ? q.value : '').toLowerCase();
+      var c    = (cond && cond.value ? cond.value : '');
+      var mq   = Number(minqty && minqty.value ? minqty.value : 0);
 
-      const filtered = inventory.filter(r => {
-        const hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
-        return hay.includes(term) && (!c || r.cond === c) && ((r.qty||0) >= mq);
+      var filtered = inventory.filter(function(r){
+        var hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
+        var hit = hay.indexOf(term) !== -1;
+        var condOk = !c || r.cond === c;
+        var qtyOk = (r.qty || 0) >= mq;
+        return hit && condOk && qtyOk;
       });
 
       rows.innerHTML = '';
-      for (const r of filtered){
-        const tr = document.createElement('tr');
+      for (var i=0; i<filtered.length; i++){
+        var r = filtered[i];
+        var tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50';
 
-        const tdPN  = document.createElement('td'); tdPN.className  = 'p-3 sticky-col font-medium'; tdPN.textContent  = r.pn || '';
-        const tdNSN = document.createElement('td'); tdNSN.className = 'p-3'; tdNSN.textContent = r.nsn || '';
-        const tdAlt = document.createElement('td'); tdAlt.className = 'p-3'; tdAlt.textContent = r.alt || '';
-        const tdDes = document.createElement('td'); tdDes.className = 'p-3'; tdDes.textContent = r.desc || '';
-        const tdCon = document.createElement('td'); tdCon.className = 'p-3'; tdCon.textContent = r.cond || '';
-        const tdQty = document.createElement('td'); tdQty.className = 'p-3'; tdQty.textContent = (r.qty ?? '').toString();
-
-        tr.appendChild(tdPN); tr.appendChild(tdNSN); tr.appendChild(tdAlt);
-        tr.appendChild(tdDes); tr.appendChild(tdCon); tr.appendChild(tdQty);
+        var cells = [
+          { cls:'p-3 sticky-col font-medium', text:r.pn || '' },
+          { cls:'p-3', text:r.nsn || '' },
+          { cls:'p-3', text:r.alt || '' },
+          { cls:'p-3', text:r.desc || '' },
+          { cls:'p-3', text:r.cond || '' },
+          { cls:'p-3', text:String(r.qty != null ? r.qty : '') }
+        ];
+        for (var j=0; j<cells.length; j++){
+          var td = document.createElement('td');
+          td.className = cells[j].cls;
+          td.textContent = cells[j].text;
+          tr.appendChild(td);
+        }
         rows.appendChild(tr);
       }
 
@@ -136,23 +151,24 @@
     }
 
     function loadData(){
-      const url = DATA_URL + (DATA_URL.includes('?') ? '&' : '?') + 't=' + Date.now(); // cache-bust
+      var url = DATA_URL + (DATA_URL.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now(); // cache-bust
       fetch(url, { cache: 'no-store' })
-        .then(res => { if (!res.ok) throw new Error('CSV HTTP ' + res.status); return res.text(); })
-        .then(text => {
+        .then(function (res) { if (!res.ok) throw new Error('CSV HTTP ' + res.status); return res.text(); })
+        .then(function (text) {
           Papa.parse(text, {
-            header: true, skipEmptyLines: true, dynamicTyping: false,
-            complete: (r) => { inventory = r.data.map(normalizeRow); render(); }
+            header: true,
+            skipEmptyLines: true,
+            dynamicTyping: false,
+            complete: function (r) { inventory = r.data.map(normalizeRow); render(); }
           });
         })
-        .catch(err => { console.error(err); count.textContent = 'Failed to load data: ' + err.message; });
+        .catch(function (err) { console.error(err); if (count) count.textContent = 'Failed to load data: ' + err.message; });
     }
 
-    // events
-    q?.addEventListener('input', render);
-    cond?.addEventListener('change', render);
-    minqty?.addEventListener('input', render);
-    clear?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; render(); });
+    if (q) q.addEventListener('input', render);
+    if (cond) cond.addEventListener('change', render);
+    if (minqty) minqty.addEventListener('input', render);
+    if (clear) clear.addEventListener('click', function(){ if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; render(); });
 
     loadData();
   })();
