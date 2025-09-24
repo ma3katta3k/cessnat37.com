@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cessna T-37 Aircraft Spares</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <header class="bg-white border-b"><div class="max-w-5xl mx-auto p-4">
+    <h1 class="text-2xl font-bold">Cessna T-37 Aircraft Spares</h1>
+  </div></header>
+
+  <main class="max-w-5xl mx-auto p-4">
+    <div class="grid md:grid-cols-4 gap-4 mb-4">
+      <input id="q" class="border rounded p-2" placeholder="Search (PN, NSN, Desc)"/>
+      <select id="cond" class="border rounded p-2">
+        <option value="">All</option><option>NS</option><option>SV</option><option>OH</option><option>AR</option><option>RP</option>
+      </select>
+      <input id="minqty" type="number" min="0" class="border rounded p-2" placeholder="Min Qty"/>
+      <button id="clear" class="border rounded p-2">Clear</button>
+    </div>
+
+    <div class="border rounded bg-white overflow-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-100 text-left">
+          <tr><th class="p-2">Part Number</th><th class="p-2">NSN</th><th class="p-2">Alt. P/N</th>
+              <th class="p-2">Description</th><th class="p-2">Cond</th><th class="p-2">Qty</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p id="count" class="text-sm text-gray-600 mt-2">Loading…</p>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script>
+  (function () {
+    var DATA_URL = '/inventory/t37.csv'; // local CSV
+
+    var rows=document.getElementById('rows'), q=document.getElementById('q'),
+        cond=document.getElementById('cond'), minqty=document.getElementById('minqty'),
+        count=document.getElementById('count'), clear=document.getElementById('clear');
+
+    window.onerror=function(msg){ if(count) count.textContent='Error: '+msg; };
+
+    var inv=[];
+
+    function norm(r){
+      function h(o,k){return Object.prototype.hasOwnProperty.call(o,k)&&o[k]!=='';}
+      function s(v){retur
