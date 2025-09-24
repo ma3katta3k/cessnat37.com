@@ -3,41 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cessna T‑37 Aircraft Spares | Your Company</title>
-  <meta name="description" content="Cessna T‑37 aircraft spares list with part number, NSN, alt P/N, description, condition, and quantity. Request a quote today."/>
+  <title>Cessna T-37 Aircraft Spares</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* sticky first column for wide tables */
-    .sticky-col { position: sticky; left: 0; background: white; box-shadow: 1px 0 0 rgba(0,0,0,.06); }
-    .tg td, .tg th { border-bottom: 1px solid #e5e7eb; }
-    .visually-hidden { position:absolute; clip:rect(1px,1px,1px,1px); padding:0; border:0; height:1px; width:1px; overflow:hidden; }
+    .sticky-col{position:sticky;left:0;background:#fff;box-shadow:1px 0 0 #e5e7eb}
+    .tg td,.tg th{border-bottom:1px solid #e5e7eb}
+    .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
-  <!-- Top bar -->
-  <header class="bg-white border-b sticky top-0 z-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-4">
-      <a href="#" class="font-semibold tracking-tight">Your Company</a>
-      <div class="ml-auto flex items-center gap-4 text-sm">
-        <a href="tel:+3530000000" class="inline-flex items-center gap-2 hover:text-blue-700">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 16.92v3a2 2 0 01-2.18 2 19.86 19.86 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.86 19.86 0 013.08 4.18 2 2 0 015.06 2h3a2 2 0 012 1.72c.12.9.3 1.78.57 2.63a2 2 0 01-.45 2.11L9 9a16 16 0 006 6l.54-.18a2 2 0 012.11.45c.85.27 1.73.45 2.63.57A2 2 0 0122 16.92z"/></svg>
-          +353 00 000 0000
-        </a>
-        <a href="mailto:sales@yourco.example" class="hover:text-blue-700">sales@yourco.example</a>
-        <a href="#quote" class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5">Request a Quote</a>
-      </div>
+  <header class="bg-white border-b">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex items-center">
+      <h1 class="text-2xl font-bold">Cessna T-37 Aircraft Spares</h1>
     </div>
   </header>
-
-  <!-- Hero -->
-  <section class="bg-[url('https://images.unsplash.com/photo-1506807803488-8eafc15316c1?q=80&w=1400&auto=format&fit=crop')] bg-cover bg-center">
-    <div class="backdrop-brightness-50">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-white">
-        <h1 class="text-3xl sm:text-4xl font-bold">Cessna T‑37 Aircraft Spares</h1>
-        <p class="mt-2 max-w-2xl text-white/90">Browse in‑stock and rotable inventory. Use search & filters, then send the selected lines for a fast quote.</p>
-      </div>
-    </div>
-  </section>
 
   <!-- Filters -->
   <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
@@ -49,12 +28,7 @@
       <label class="block">
         <span class="text-sm font-medium">Condition</span>
         <select id="cond" class="mt-1 w-full rounded-lg border px-3 py-2">
-          <option value="">All</option>
-          <option>NS</option>
-          <option>SV</option>
-          <option>OH</option>
-          <option>AR</option>
-          <option>RP</option>
+          <option value="">All</option><option>NS</option><option>SV</option><option>OH</option><option>AR</option><option>RP</option>
         </select>
       </label>
       <label class="block">
@@ -62,19 +36,17 @@
         <input id="minqty" type="number" min="0" class="mt-1 w-full rounded-lg border px-3 py-2"/>
       </label>
       <div class="flex items-end gap-2">
-        <button id="clear" class="rounded-lg border px-3 py-2">Clear</button>
-        <button id="exportSel" class="rounded-lg bg-blue-600 text-white px-3 py-2">Quote Selected</button>
+        <button id="clear" class="rounded-lg border px-3 py-2" type="button">Clear</button>
       </div>
     </div>
   </section>
 
   <!-- Table -->
-  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12" data-section="inventory-table">
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
     <div class="overflow-auto rounded-xl border bg-white">
       <table class="w-full tg" role="table" aria-label="Inventory list">
         <thead class="bg-gray-100 text-left text-sm">
           <tr>
-            <th class="p-3 w-10"><span class="visually-hidden">Select</span></th>
             <th class="p-3 sticky-col">Part Number</th>
             <th class="p-3">NSN</th>
             <th class="p-3">Alt. P/N</th>
@@ -89,142 +61,95 @@
     <p id="count" class="mt-3 text-sm text-gray-600">Loading…</p>
   </section>
 
-  <!-- Quote form -->
-  <section id="quote" class="bg-white border-t">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-2 gap-8">
-      <div>
-        <h2 class="text-2xl font-semibold">Request a Quote</h2>
-        <p class="mt-2 text-gray-600">Submit your contact details and selected line items. A sales rep will respond promptly.</p>
-        <form class="mt-6 grid gap-3" onsubmit="event.preventDefault(); submitQuote();">
-          <input required id="name" placeholder="Name" class="rounded-lg border px-3 py-2" aria-label="Name" />
-          <input required id="email" type="email" placeholder="Email" class="rounded-lg border px-3 py-2" aria-label="Email" />
-          <input id="phone" placeholder="Phone" class="rounded-lg border px-3 py-2" aria-label="Phone" />
-          <textarea id="notes" placeholder="Notes (end‑use, export, delivery)" class="rounded-lg border px-3 py-2 h-28" aria-label="Notes"></textarea>
-          <textarea id="selected" readonly class="rounded-lg border px-3 py-2 h-28" placeholder="Selected line items will appear here" aria-label="Selected Line Items"></textarea>
-          <button class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 w-max" aria-label="Send Quote">Send</button>
-          <p id="formStatus" class="text-sm text-green-700 hidden">Sent. We’ll be in touch.</p>
-        </form>
-      </div>
-      <aside class="bg-gray-50 rounded-xl p-6 border">
-        <h3 class="font-semibold">Why buy from us?</h3>
-        <ul class="mt-3 list-disc pl-5 text-sm text-gray-700 space-y-1">
-          <li>Trusted, quality‑assured supplier</li>
-          <li>Export compliance & end‑user screening</li>
-          <li>Rapid AOG response</li>
-          <li>Global logistics support</li>
-        </ul>
-        <div class="mt-6 text-sm">
-          <p class="font-medium">Compliance</p>
-          <p>ITAR/EAR aware · Traceable paperwork · CofC available where applicable.</p>
-        </div>
-      </aside>
-    </div>
-  </section>
+  <!-- CSV parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script>
+  (() => {
+    const DATA_URL = '/inventory/t37.csv'; // local CSV
 
-  <footer class="border-t bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-sm text-gray-600 flex flex-wrap items-center gap-3">
-      <p>&copy; <span id="yr"></span> Your Company. All rights reserved.</p>
-      <a href="#" class="underline">Privacy</a>
-      <a href="#" class="underline">Terms</a>
-    </div>
-  </footer>
+    // DOM
+    const rows = document.getElementById('rows');
+    const q = document.getElementById('q');
+    const cond = document.getElementById('cond');
+    const minqty = document.getElementById('minqty');
+    const count = document.getElementById('count');
+    const clearBtn = document.getElementById('clear');
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script>
-  // Local CSV
-  const DATA_URL = '/inventory/t37.csv';
+    // show any JS error in the UI
+    window.onerror = (msg) => { count.textContent = 'Error: ' + msg; };
 
-  // DOM
-  const rows = document.getElementById('rows');
-  const q = document.getElementById('q');
-  const cond = document.getElementById('cond');
-  const minqty = document.getElementById('minqty');
-  const count = document.getElementById('count');
-  const clearBtn = document.getElementById('clear');
-  const exportBtn = document.getElementById('exportSel');
-  const selectedBox = document.getElementById('selected');
+    let INVENTORY = [];
 
-  // State
-  let INVENTORY = [];
-  const state = { sel: new Set(), rowMap: new Map() };
+    function render(){
+      const term = (q?.value || '').toLowerCase();
+      const c = cond?.value || '';
+      const mq = Number(minqty?.value || 0);
 
-  function render(){
-    const term = (q?.value || '').toLowerCase();
-    const c = cond?.value || '';
-    const mq = Number(minqty?.value || 0);
-
-    const filtered = (INVENTORY||[]).filter(r => {
-      const hay = [r.pn, r.nsn, r.alt, r.desc].join(' ').toLowerCase();
-      const hit = hay.includes(term);
-      const condOk = !c || r.cond === c;
-      const qtyOk = (Number(r.qty)||0) >= mq;
-      return hit && condOk && qtyOk;
-    });
-
-    rows.innerHTML = '';
-    state.rowMap.clear();
-
-    filtered.forEach(r => {
-      const tr = document.createElement('tr');
-      tr.className = 'hover:bg-gray-50';
-      const key = (r.pn||'') + '|' + (r.nsn||'');
-      state.rowMap.set(key, r);
-      const checked = state.sel.has(key) ? 'checked' : '';
-      tr.innerHTML = `
-        <td class="p-3 align-top"><input type="checkbox" data-key="${key}" ${checked} class="accent-blue-600"/></td>
-        <td class="p-3 sticky-col font-medium">${r.pn || ''}</td>
-        <td class="p-3">${r.nsn || ''}</td>
-        <td class="p-3">${r.alt || ''}</td>
-        <td class="p-3">${r.desc || ''}</td>
-        <td class="p-3">${r.cond || ''}</td>
-        <td class="p-3">${r.qty ?? ''}</td>`;
-      rows.appendChild(tr);
-    });
-
-    count.textContent = `${filtered.length} line item(s)`;
-
-    rows.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', e => {
-        const k = e.target.getAttribute('data-key');
-        if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
-        updateSelectedBox();
+      const filtered = INVENTORY.filter(r => {
+        const hay = [r.pn, r.nsn, r.alt, r.desc].join(' ').toLowerCase();
+        return hay.includes(term) && (!c || r.cond === c) && ((r.qty||0) >= mq);
       });
-    });
-  }
 
-  function updateSelectedBox(){
-    const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
-    const text = selected.map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn?` | NSN ${r.nsn}`:''}`).join('\n');
-    if (selectedBox) selectedBox.value = text;
-  }
+      rows.innerHTML = '';
+      filtered.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+        tr.innerHTML = `
+          <td class="p-3 sticky-col font-medium">${r.pn || ''}</td>
+          <td class="p-3">${r.nsn || ''}</td>
+          <td class="p-3">${r.alt || ''}</td>
+          <td class="p-3">${r.desc || ''}</td>
+          <td class="p-3">${r.cond || ''}</td>
+          <td class="p-3">${r.qty ?? ''}</td>`;
+        rows.appendChild(tr);
+      });
 
-  function loadData(){
-    Papa.parse(DATA_URL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: false,
-      complete: (r)=>{ INVENTORY = r.data.map(row => ({
-        pn:   String(row.pn || '').trim(),
-        nsn:  String(row.nsn || '').trim(),
-        alt:  String(row.alt || '').trim(),
-        desc: String(row.desc || '').trim(),
-        cond: String(row.cond || '').trim(),
-        qty:  parseInt(String(row.qty||'').replace(/[^0-9-]/g,''), 10) || 0
-      })); render(); },
-      error: (err)=>{ console.error(err); count.textContent = 'Failed to load data.'; }
-    });
-  }
+      count.textContent = `${filtered.length} line item(s)`;
+    }
 
-  q?.addEventListener('input', render);
-  cond?.addEventListener('change', render);
-  minqty?.addEventListener('input', render);
-  clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
-  exportBtn?.addEventListener('click', () => {
-    if (!state.sel.size) { alert('Select at least one line.'); return; }
-    document.getElementById('quote').scrollIntoView({ behavior:'smooth' });
-  });
+    function normalizeRow(r){
+      // supports either simple headers (pn,desc,…) or your ERP names
+      const get = (o,...k)=>k.find(x=>Object.prototype.hasOwnProperty.call(o,x) && o[x] !== '')||null;
+      const s = v => (v==null ? '' : String(v).trim());
+      const n = v => { const m = String(v||'').replace(/[^0-9-]/g,''); return m ? parseInt(m,10) : 0; };
 
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  loadData();
-</script>
+      const pnK   = get(r,'pn','PN','PartNumber','PARTNUMBER');
+      const nsnK  = get(r,'nsn','NSN');
+      const altK  = get(r,'alt','ALT','AlternatePartNumber','ALTERNATEPARTNUMBER');
+      const descK = get(r,'desc','DESC','Description','DESCRIPTION');
+      const condK = get(r,'cond','COND','Condition','CONDITIONCD');
+      const qtyK  = get(r,'qty','Qty','QUANTITY');
+
+      return {
+        pn:   s(pnK ? r[pnK]   : r.pn),
+        nsn:  s(nsnK? r[nsnK]  : r.nsn),
+        alt:  s(altK? r[altK]  : r.alt),
+        desc: s(descK? r[descK]: r.desc),
+        cond: s(condK? r[condK]: r.cond),
+        qty:  n(qtyK?  r[qtyK] : r.qty)
+      };
+    }
+
+    function loadData(){
+      const url = DATA_URL + (DATA_URL.includes('?') ? '&' : '?') + 't=' + Date.now(); // cache-bust
+      fetch(url, { cache: 'no-store' })
+        .then(res => { if (!res.ok) throw new Error(`CSV HTTP ${res.status}`); return res.text(); })
+        .then(text => {
+          Papa.parse(text, {
+            header: true, skipEmptyLines: true, dynamicTyping: false,
+            complete: (r)=>{ INVENTORY = r.data.map(normalizeRow); render(); }
+          });
+        })
+        .catch(err => { console.error(err); count.textContent = 'Failed to load data: ' + err.message; });
+    }
+
+    q?.addEventListener('input', render);
+    cond?.addEventListener('change', render);
+    minqty?.addEventListener('input', render);
+    clearBtn?.addEventListener('click', () => { if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; loadData(); });
+
+    loadData();
+  })();
+  </script>
+</body>
+</html>
