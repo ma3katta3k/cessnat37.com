@@ -1,6 +1,8 @@
+cat > _headers <<'EOF'
 /*
   Content-Security-Policy: default-src 'self';
   Content-Security-Policy: img-src 'self' data: https://*.googleusercontent.com https://*.gstatic.com;
-  Content-Security-Policy: script-src 'self';
   Content-Security-Policy: style-src 'self' 'unsafe-inline';
-  Content-Security-Policy: frame-src https://docs.google.com https://*.google.com https://*.googleusercontent.com;
+  Content-Security-Policy: script-src 'self';
+  Content-Security-Policy: frame-src https://docs.google.com https://*.google.com https://*.googleusercontent.com
+EOF

@@ -1,37 +1,37 @@
+cd ~/Development/cessnat37.com
+cat > index.html <<'EOF'
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cessna T-37 Aircraft Spares</title>
-  <meta name="description" content="Cessna T-37 aircraft spares — live inventory embedded from Google Sheets." />
+  <meta name="description" content="Cessna T-37 spares — live Google Sheet." />
   <style>
     :root { color-scheme: light; }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111827; background:#f8fafc; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f8fafc; color:#111827; }
     header { background:#fff; border-bottom:1px solid #e5e7eb; }
     .wrap { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    h1 { margin: 0 0 6px; font-size: clamp(1.6rem, 2.6vw, 2.2rem); }
-    p.lead { margin: 0 0 18px; color:#4b5563; }
-    .card { background:#fff; border:1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
-    .sheet-embed { width: 100%; height: 75vh; min-height: 520px; border: 0; display: block; }
-    .hint { font-size: 0.9rem; color:#6b7280; margin-top: 10px; }
-    .hint a { color:#2563eb; text-decoration: underline; }
-    @media (min-height: 900px) { .sheet-embed { height: 85vh; } }
+    h1 { margin:0 0 6px; font-size: clamp(1.6rem, 2.6vw, 2.2rem); }
+    p.lead { margin:0 0 18px; color:#4b5563; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; }
+    iframe.sheet { width:100%; height:75vh; min-height:520px; border:0; display:block; }
+    .hint { font-size:.9rem; color:#6b7280; margin-top:10px; }
+    .hint a { color:#2563eb; text-decoration:underline; }
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <h1>Cessna T-37 Aircraft Spares</h1>
-      <p class="lead">Live parts list embedded from our Google Sheet.</p>
+      <p class="lead">Live parts list embedded from Google Sheets.</p>
     </div>
   </header>
 
-  <main class="wrap" style="padding-top: 18px; padding-bottom: 40px;">
+  <main class="wrap" style="padding-top:18px;padding-bottom:40px">
     <div class="card">
       <iframe
-        class="sheet-embed"
+        class="sheet"
         title="Cessna T-37 Parts (Google Sheet)"
         src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pubhtml?widget=true&amp;headers=false"
         loading="lazy"
@@ -45,3 +45,4 @@
   </main>
 </body>
 </html>
+EOF
