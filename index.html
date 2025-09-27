@@ -1,5 +1,3 @@
-cd ~/Development/cessnat37.com
-cat > index.html <<'EOF'
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,41 +6,28 @@ cat > index.html <<'EOF'
   <title>Cessna T-37 Aircraft Spares</title>
   <meta name="description" content="Cessna T-37 spares — live Google Sheet." />
   <style>
-    :root { color-scheme: light; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f8fafc; color:#111827; }
-    header { background:#fff; border-bottom:1px solid #e5e7eb; }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    h1 { margin:0 0 6px; font-size: clamp(1.6rem, 2.6vw, 2.2rem); }
-    p.lead { margin:0 0 18px; color:#4b5563; }
-    .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden; }
-    iframe.sheet { width:100%; height:75vh; min-height:520px; border:0; display:block; }
-    .hint { font-size:.9rem; color:#6b7280; margin-top:10px; }
-    .hint a { color:#2563eb; text-decoration:underline; }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:#111827}
+    header{background:#fff;border-bottom:1px solid #e5e7eb}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
+    iframe.sheet{width:100%;height:75vh;min-height:520px;border:0;display:block}
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <h1>Cessna T-37 Aircraft Spares</h1>
-      <p class="lead">Live parts list embedded from Google Sheets.</p>
-    </div>
-  </header>
+  <header><div class="wrap">
+    <h1>Cessna T-37 Aircraft Spares</h1>
+    <p>Live parts list embedded from Google Sheets.</p>
+  </div></header>
 
-  <main class="wrap" style="padding-top:18px;padding-bottom:40px">
+  <main class="wrap" style="padding:18px 20px 40px">
     <div class="card">
       <iframe
         class="sheet"
         title="Cessna T-37 Parts (Google Sheet)"
-        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pubhtml?widget=true&amp;headers=false"
+        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pubhtml?widget=true&headers=false"
         loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade">
-      </iframe>
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
-
-    <p class="hint">
-      If the sheet doesn’t load, <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pubhtml?widget=true&amp;headers=false" target="_blank" rel="noopener">open it in a new tab</a>.
-    </p>
   </main>
 </body>
 </html>
-EOF
