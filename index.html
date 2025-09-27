@@ -4,218 +4,44 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cessna T-37 Aircraft Spares</title>
-  <meta name="description" content="Browse in-stock and rotable T-37 spares. Search & filter, then request a quote." />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Cessna T-37 aircraft spares — live inventory embedded from Google Sheets." />
   <style>
-    .sticky-col{position:sticky;left:0;background:#fff;box-shadow:1px 0 0 #e5e7eb}
-    .tg td,.tg th{border-bottom:1px solid #e5e7eb}
-    .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111827; background:#f8fafc; }
+    header { background:#fff; border-bottom:1px solid #e5e7eb; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    h1 { margin: 0 0 6px; font-size: clamp(1.6rem, 2.6vw, 2.2rem); }
+    p.lead { margin: 0 0 18px; color:#4b5563; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+    .sheet-embed { width: 100%; height: 75vh; min-height: 520px; border: 0; display: block; }
+    .hint { font-size: 0.9rem; color:#6b7280; margin-top: 10px; }
+    .hint a { color:#2563eb; text-decoration: underline; }
+    @media (min-height: 900px) { .sheet-embed { height: 85vh; } }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
-  <!-- Top bar -->
-  <header class="bg-white border-b sticky top-0 z-20">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center gap-4">
-      <a href="/" class="font-semibold tracking-tight">Your Company</a>
-      <div class="ml-auto text-sm">sales@yourco.example · +353 00 000 0000</div>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Cessna T-37 Aircraft Spares</h1>
+      <p class="lead">Live parts list embedded from our Google Sheet.</p>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="bg-gray-800">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-white">
-      <h1 class="text-3xl sm:text-4xl font-bold">Cessna T-37 Aircraft Spares</h1>
-      <p class="mt-2 max-w-2xl text-white/90">
-        Browse in-stock and rotable inventory. Use search & filters, then send the selected lines for a fast quote.
-      </p>
+  <main class="wrap" style="padding-top: 18px; padding-bottom: 40px;">
+    <div class="card">
+      <iframe
+        class="sheet-embed"
+        title="Cessna T-37 Parts (Google Sheet)"
+        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pubhtml?widget=true&amp;headers=false"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
     </div>
-  </section>
 
-  <!-- Filters -->
-  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <label class="block">
-        <span class="text-sm font-medium">Search</span>
-        <input id="q" type="search" placeholder="Part #, NSN, Desc…" class="mt-1 w-full rounded-lg border px-3 py-2" aria-label="Search" />
-      </label>
-      <label class="block">
-        <span class="text-sm font-medium">Condition</span>
-        <select id="cond" class="mt-1 w-full rounded-lg border px-3 py-2">
-          <option value="">All</option>
-          <option>NS</option><option>SV</option><option>OH</option><option>AR</option><option>RP</option>
-        </select>
-      </label>
-      <label class="block">
-        <span class="text-sm font-medium">Min Qty</span>
-        <input id="minqty" type="number" min="0" class="mt-1 w-full rounded-lg border px-3 py-2"/>
-      </label>
-      <div class="flex items-end gap-2">
-        <button id="clear" class="rounded-lg border px-3 py-2" type="button" aria-label="Clear Filters">Clear</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Table -->
-  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12" data-section="inventory-table">
-    <div class="overflow-auto rounded-xl border bg-white">
-      <table class="w-full tg" role="table" aria-label="Inventory list">
-        <thead class="bg-gray-100 text-left text-sm">
-          <tr>
-            <th class="p-3 sticky-col">Part Number</th>
-            <th class="p-3">NSN</th>
-            <th class="p-3">Alt. P/N</th>
-            <th class="p-3">Description</th>
-            <th class="p-3">Cond</th>
-            <th class="p-3">Qty</th>
-          </tr>
-        </thead>
-        <tbody id="rows" class="text-sm"></tbody>
-      </table>
-    </div>
-    <p id="count" class="mt-3 text-sm text-gray-600">Loading…</p>
-  </section>
-
-  <!-- CSV parser -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <script>
-    // Configuration
-    const DATA_URL = '/inventory/t37.csv'; // CSV file URL
-
-    // DOM elements
-    const rows = document.getElementById('rows');
-    const q = document.getElementById('q');
-    const cond = document.getElementById('cond');
-    const minqty = document.getElementById('minqty');
-    const count = document.getElementById('count');
-    const clear = document.getElementById('clear');
-
-    // Global error handler
-    window.onerror = (msg) => {
-      if (count) {
-        count.textContent = `Error: ${msg}`;
-      }
-    };
-
-    let inventory = [];
-
-    // Utility function to sanitize input
-    const sanitize = (str) => {
-      return str.replace(/[^\w. ]/gi, function (c) {
-        return '&#' + c.charCodeAt(0) + ';';
-      });
-    };
-
-    // Normalize CSV headers
-    const normalizeRow = (r) => {
-      const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k) && o[k] !== '';
-      const val = (v) => (v == null ? '' : sanitize(String(v).trim()));
-      const num = (v) => {
-        const m = String(v || '').replace(/[^0-9-]/g, '');
-        return m ? parseInt(m, 10) : 0;
-      };
-
-      const pn = has(r, 'pn') ? r.pn : has(r, 'PARTNUMBER') ? r.PARTNUMBER : '';
-      const nsn = has(r, 'nsn') ? r.nsn : has(r, 'NSN') ? r.NSN : '';
-      const alt = has(r, 'alt') ? r.alt : has(r, 'ALTERNATEPARTNUMBER') ? r.ALTERNATEPARTNUMBER : '';
-      const desc = has(r, 'desc') ? r.desc : has(r, 'DESCRIPTION') ? r.DESCRIPTION : '';
-      const cond = has(r, 'cond') ? r.cond : has(r, 'CONDITIONCD') ? r.CONDITIONCD : '';
-      const qty = has(r, 'qty') ? r.qty : has(r, 'QUANTITY') ? r.QUANTITY : '';
-
-      return {
-        pn: val(pn),
-        nsn: val(nsn),
-        alt: val(alt),
-        desc: val(desc),
-        cond: val(cond),
-        qty: num(qty),
-      };
-    };
-
-    // Render table rows
-    const render = () => {
-      const term = (q && q.value ? q.value : '').toLowerCase();
-      const c = cond && cond.value ? cond.value : '';
-      const mq = Number(minqty && minqty.value ? minqty.value : 0);
-
-      const filtered = inventory.filter((r) => {
-        const hay = `${r.pn} ${r.nsn} ${r.alt} ${r.desc}`.toLowerCase();
-        const hit = hay.includes(term);
-        const condOk = !c || r.cond === c;
-        const qtyOk = (r.qty || 0) >= mq;
-        return hit && condOk && qtyOk;
-      });
-
-      rows.innerHTML = '';
-      filtered.forEach((r) => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-50';
-
-        const cells = [
-          { cls: 'p-3 sticky-col font-medium', text: r.pn || '' },
-          { cls: 'p-3', text: r.nsn || '' },
-          { cls: 'p-3', text: r.alt || '' },
-          { cls: 'p-3', text: r.desc || '' },
-          { cls: 'p-3', text: r.cond || '' },
-          { cls: 'p-3', text: String(r.qty != null ? r.qty : '') },
-        ];
-
-        cells.forEach((cell) => {
-          const td = document.createElement('td');
-          td.className = cell.cls;
-          td.textContent = cell.text;
-          tr.appendChild(td);
-        });
-
-        rows.appendChild(tr);
-      });
-
-      count.textContent = `${filtered.length} line item(s)`;
-    };
-
-    // Load data from CSV
-    const loadData = () => {
-      const url = `${DATA_URL}${DATA_URL.indexOf('?') > -1 ? '&' : '?'}t=${Date.now()}`; // cache-bust
-      fetch(url, { cache: 'no-store' })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error(`CSV HTTP ${res.status}`);
-          }
-          return res.text();
-        })
-        .then((text) => {
-          Papa.parse(text, {
-            header: true,
-            skipEmptyLines: true,
-            dynamicTyping: false,
-            complete: (r) => {
-              inventory = r.data.map(normalizeRow);
-              render();
-            },
-            error: (error) => {
-              console.error('CSV parsing error:', error);
-              count.textContent = `Failed to parse CSV: ${error.message}`;
-            },
-          });
-        })
-        .catch((err) => {
-          console.error(err);
-          count.textContent = `Failed to load data: ${err.message}`;
-        });
-    };
-
-    // Event listeners
-    q?.addEventListener('input', render);
-    cond?.addEventListener('change', render);
-    minqty?.addEventListener('input', render);
-    clear?.addEventListener('click', () => {
-      if (q) q.value = '';
-      if (cond) cond.value = '';
-      if (minqty) minqty.value = '';
-      render();
-    });
-
-    // Load data on page load
-    loadData();
-  </script>
+    <p class="hint">
+      If the sheet doesn’t load, <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pubhtml?widget=true&amp;headers=false" target="_blank" rel="noopener">open it in a new tab</a>.
+    </p>
+  </main>
 </body>
 </html>
