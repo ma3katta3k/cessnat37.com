@@ -4,26 +4,31 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cessna T-37 Aircraft Spares</title>
-  <meta name="description" content="Cessna T-37 spares with search, filters, and quote request." />
+  <meta name="description" content="Cessna T-37 spares with search, filters, and quick quote." />
+  <link rel="icon" href="data:,">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .sticky-col{position:sticky;left:0;background:#fff;box-shadow:1px 0 0 #e5e7eb}
     .tg td,.tg th{border-bottom:1px solid #e5e7eb}
-    .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
+    .vh{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
   </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
   <header class="bg-white border-b sticky top-0 z-20">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
-      <a href="/" class="font-semibold tracking-tight">Your Company</a>
-      <div class="ml-auto text-sm">sales@yourco.example · +353 00 000 0000</div>
+      <a class="font-semibold tracking-tight" href="/">Your Company</a>
+      <nav class="ml-auto text-sm flex items-center gap-4">
+        <a href="mailto:sales@yourco.example" class="hover:text-blue-700">sales@yourco.example</a>
+        <a href="tel:+3530000000" class="hover:text-blue-700">+353 00 000 0000</a>
+        <a href="#quote" class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5">Request a Quote</a>
+      </nav>
     </div>
   </header>
 
   <section class="bg-gray-800">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-white">
       <h1 class="text-3xl sm:text-4xl font-bold">Cessna T-37 Aircraft Spares</h1>
-      <p class="mt-2 max-w-2xl text-white/90">Search & filter the live stock list, then request a quote.</p>
+      <p class="mt-2 max-w-2xl text-white/90">Search & filter live stock. Select lines and send a fast RFQ.</p>
     </div>
   </section>
 
@@ -57,7 +62,7 @@
       <table class="w-full tg" role="table" aria-label="Inventory list">
         <thead class="bg-gray-100 text-left text-sm">
           <tr>
-            <th class="p-3 w-10"><span class="visually-hidden">Select</span></th>
+            <th class="p-3 w-10"><span class="vh">Select</span></th>
             <th class="p-3 sticky-col">Part Number</th>
             <th class="p-3">NSN</th>
             <th class="p-3">Alt. P/N</th>
@@ -77,14 +82,17 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-2 gap-8">
       <div>
         <h2 class="text-2xl font-semibold">Request a Quote</h2>
-        <form class="mt-6 grid gap-3" onsubmit="event.preventDefault(); submitQuote();">
+        <form class="mt-6 grid gap-3" onsubmit="event.preventDefault(); sendRFQ();">
           <input required id="name" placeholder="Name" class="rounded-lg border px-3 py-2" />
           <input required id="email" type="email" placeholder="Email" class="rounded-lg border px-3 py-2" />
           <input id="phone" placeholder="Phone" class="rounded-lg border px-3 py-2" />
           <textarea id="notes" placeholder="Notes (end-use, export, delivery)" class="rounded-lg border px-3 py-2 h-28"></textarea>
-          <textarea id="selected" readonly class="rounded-lg border px-3 py-2 h-28" placeholder="Selected line items will appear here"></textarea>
-          <button class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 w-max">Send</button>
-          <p id="formStatus" class="text-sm text-green-700 hidden">Sent. We’ll be in touch.</p>
+          <textarea id="selected" readonly class="rounded-lg border px-3 py-2 h-28" placeholder="Selected line items appear here"></textarea>
+          <div class="flex gap-2">
+            <button class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 w-max">Email RFQ</button>
+            <a id="mailtoLink" class="hidden text-blue-700 underline" target="_blank" rel="noopener">Open email client</a>
+          </div>
+          <p id="formStatus" class="text-sm text-green-700 hidden">RFQ composed. Check your email client window.</p>
         </form>
       </div>
       <aside class="bg-gray-50 rounded-xl p-6 border text-sm text-gray-700">
@@ -105,59 +113,61 @@
     </div>
   </footer>
 
+  <!-- CSV parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
   (function () {
-    // Data source — local CSV is simplest & avoids CORS
-    const DATA_URL = '/inventory/t37.csv'; // or paste your Google "pub?output=csv" URL
+    // Use local CSV to avoid CORS. Replace with your real export later.
+    var DATA_URL = '/inventory/t37.csv';
 
-    const rows = document.getElementById('rows');
-    const q = document.getElementById('q');
-    const cond = document.getElementById('cond');
-    const minqty = document.getElementById('minqty');
-    const count = document.getElementById('count');
-    const clearBtn = document.getElementById('clear');
-    const exportBtn = document.getElementById('exportSel');
-    const selectedBox = document.getElementById('selected');
+    var rows = document.getElementById('rows');
+    var q = document.getElementById('q');
+    var cond = document.getElementById('cond');
+    var minqty = document.getElementById('minqty');
+    var count = document.getElementById('count');
+    var clearBtn = document.getElementById('clear');
+    var exportBtn = document.getElementById('exportSel');
+    var selectedBox = document.getElementById('selected');
+    var mailtoLink = document.getElementById('mailtoLink');
 
-    const state = { sel: new Set(), rowMap: new Map() };
-    let INVENTORY = [];
+    var state = { sel: new Set(), rowMap: new Map() };
+    var INVENTORY = [];
 
-    window.onerror = (msg) => { if (count) count.textContent = 'Error: ' + msg; };
+    window.onerror = function (msg) { if (count) count.textContent = 'Error: ' + msg; };
 
-    function normalizeRow(r){
-      const has = (o,k)=>Object.prototype.hasOwnProperty.call(o,k)&&o[k]!==''&&o[k]!=null;
-      const s = v => (v==null?'':String(v).trim());
-      const n = v => { const m = String(v||'').replace(/[^0-9-]/g,''); return m?parseInt(m,10):0; };
+    function norm(r){
+      function has(o,k){return Object.prototype.hasOwnProperty.call(o,k) && o[k]!=='' && o[k]!=null;}
+      function s(v){return v==null?'':String(v).trim();}
+      function n(v){var m=String(v||'').replace(/[^0-9-]/g,'');return m?parseInt(m,10):0;}
 
-      const pn   = has(r,'pn')?r.pn:(has(r,'PARTNUMBER')?r.PARTNUMBER:'');
-      const nsn  = has(r,'nsn')?r.nsn:(has(r,'NSN')?r.NSN:'');
-      const alt  = has(r,'alt')?r.alt:(has(r,'ALTERNATEPARTNUMBER')?r.ALTERNATEPARTNUMBER:'');
-      const desc = has(r,'desc')?r.desc:(has(r,'DESCRIPTION')?r.DESCRIPTION:'');
-      const cnd  = has(r,'cond')?r.cond:(has(r,'CONDITIONCD')?r.CONDITIONCD:'');
-      const qty  = has(r,'qty')?r.qty:(has(r,'QUANTITY')?r.QUANTITY:'');
+      var pn   = has(r,'pn')?r.pn:(has(r,'PARTNUMBER')?r.PARTNUMBER:'');
+      var nsn  = has(r,'nsn')?r.nsn:(has(r,'NSN')?r.NSN:'');
+      var alt  = has(r,'alt')?r.alt:(has(r,'ALTERNATEPARTNUMBER')?r.ALTERNATEPARTNUMBER:'');
+      var desc = has(r,'desc')?r.desc:(has(r,'DESCRIPTION')?r.DESCRIPTION:'');
+      var cnd  = has(r,'cond')?r.cond:(has(r,'CONDITIONCD')?r.CONDITIONCD:'');
+      var qty  = has(r,'qty')?r.qty:(has(r,'QUANTITY')?r.QUANTITY:'');
 
       return { pn:s(pn), nsn:s(nsn), alt:s(alt), desc:s(desc), cond:s(cnd), qty:n(qty) };
     }
 
     function render(){
-      const term = (q?.value || '').toLowerCase();
-      const c = cond?.value || '';
-      const mq = Number(minqty?.value || 0);
+      var term = (q && q.value ? q.value : '').toLowerCase();
+      var c = (cond && cond.value) || '';
+      var mq = Number(minqty && minqty.value ? minqty.value : 0);
 
-      const filtered = INVENTORY.filter(r => {
-        const hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
-        return hay.includes(term) && (!c || r.cond === c) && ((r.qty||0) >= mq);
+      var filtered = INVENTORY.filter(function(r){
+        var hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
+        return hay.indexOf(term) !== -1 && (!c || r.cond === c) && ((r.qty||0) >= mq);
       });
 
       rows.innerHTML = '';
       state.rowMap.clear();
 
-      filtered.forEach(r => {
-        const key = (r.pn||'') + '|' + (r.nsn||'');
+      filtered.forEach(function(r){
+        var key = (r.pn||'') + '|' + (r.nsn||'');
         state.rowMap.set(key, r);
 
-        const tr = document.createElement('tr');
+        var tr = document.createElement('tr');
         tr.className = 'hover:bg-gray-50';
         tr.innerHTML =
           '<td class="p-3 align-top"><input type="checkbox" data-key="'+key+'" class="accent-blue-600"/></td>'+
@@ -172,9 +182,9 @@
 
       count.textContent = filtered.length + ' line item(s)';
 
-      rows.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
-        cb.addEventListener('change', e=>{
-          const k = e.target.getAttribute('data-key');
+      rows.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+        cb.addEventListener('change', function(e){
+          var k = e.target.getAttribute('data-key');
           if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
           updateSelectedBox();
         });
@@ -183,33 +193,48 @@
       updateSelectedBox();
     }
 
-  function updateSelectedBox(){
-    const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
-    const text = selected
-      .map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`)
-      .join('\n');
+    function updateSelectedBox(){
+      var selected = Array.from(state.sel).map(function(k){return state.rowMap.get(k)}).filter(Boolean);
+      var lines = selected.map(function(r){
+        var line = 'PN '+r.pn+' | '+r.desc+' | Cond '+r.cond+' | Qty '+r.qty;
+        if (r.nsn) line += ' | NSN '+r.nsn;
+        return line;
+      });
+      var text = lines.join('\n'); // <-- fixed (no raw line break)
       if (selectedBox) selectedBox.value = text;
-  }
-
-
-    function submitQuote(){
-      document.getElementById('formStatus').classList.remove('hidden');
-      setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 4000);
     }
-    window.submitQuote = submitQuote;
+
+    function sendRFQ(){
+      var to = 'sales@yourco.example';
+      var subject = 'RFQ: Cessna T-37 spares';
+      var body = 'Name: '+(document.getElementById('name').value||'')+
+                 '\nEmail: '+(document.getElementById('email').value||'')+
+                 '\nPhone: '+(document.getElementById('phone').value||'')+
+                 '\n\nNotes:\n'+(document.getElementById('notes').value||'')+
+                 '\n\nSelected Line Items:\n'+(selectedBox.value||'');
+      var href = 'mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+      mailtoLink.href = href; mailtoLink.classList.remove('hidden'); mailtoLink.click();
+      document.getElementById('formStatus').classList.remove('hidden');
+      setTimeout(function(){document.getElementById('formStatus').classList.add('hidden')}, 4000);
+    }
+    window.sendRFQ = sendRFQ;
 
     function loadData(){
-      Papa.parse(DATA_URL, {
-        download: true, header: true, skipEmptyLines: true, dynamicTyping: false,
-        complete: (r)=>{ INVENTORY = r.data.map(normalizeRow); render(); },
-        error: (err)=>{ console.error(err); if (count) count.textContent = 'Failed to load data.'; }
-      });
+      var url = DATA_URL + (DATA_URL.indexOf('?')>-1?'&':'?') + 't=' + Date.now(); // cache-bust
+      fetch(url, {cache:'no-store'}).then(function(res){
+        if(!res.ok) throw new Error('CSV HTTP '+res.status);
+        return res.text();
+      }).then(function(text){
+        Papa.parse(text, {header:true,skipEmptyLines:true,dynamicTyping:false,
+          complete:function(r){INVENTORY = r.data.map(norm); render(); }
+        });
+      }).catch(function(err){ console.error(err); if(count) count.textContent = 'Failed to load data.'; });
     }
 
-    q?.addEventListener('input', render);
-    cond?.addEventListener('change', render);
-    minqty?.addEventListener('input', render);
-    clearBtn?.addEventListener('click', ()=>{ if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
+    if (q) q.addEventListener('input', render);
+    if (cond) cond.addEventListener('change', render);
+    if (minqty) minqty.addEventListener('input', render);
+    if (clearBtn) clearBtn.addEventListener('click', function(){ if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
 
     document.getElementById('yr').textContent = new Date().getFullYear();
     loadData();
