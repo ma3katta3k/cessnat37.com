@@ -4,30 +4,215 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cessna T-37 Aircraft Spares</title>
-  <meta name="description" content="Cessna T-37 spares — live Google Sheet." />
+  <meta name="description" content="Cessna T-37 spares with search, filters, and quote request." />
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8fafc;color:#111827}
-    header{background:#fff;border-bottom:1px solid #e5e7eb}
-    .wrap{max-width:1200px;margin:0 auto;padding:20px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
-    iframe.sheet{width:100%;height:75vh;min-height:520px;border:0;display:block}
+    .sticky-col{position:sticky;left:0;background:#fff;box-shadow:1px 0 0 #e5e7eb}
+    .tg td,.tg th{border-bottom:1px solid #e5e7eb}
+    .visually-hidden{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
   </style>
 </head>
-<body>
-  <header><div class="wrap">
-    <h1>Cessna T-37 Aircraft Spares</h1>
-    <p>Live parts list embedded from Google Sheets.</p>
-  </div></header>
-
-  <main class="wrap" style="padding:18px 20px 40px">
-    <div class="card">
-      <iframe
-        class="sheet"
-        title="Cessna T-37 Parts (Google Sheet)"
-        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRDLwnZkVXq1erye8LEWfFjqjYCNmZYuD5XC5jJ9EbnQv9jnSNrGPz7X-Wa7_5f-wvrpJMmjLN06aCn/pubhtml?widget=true&headers=false"
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"></iframe>
+<body class="bg-gray-50 text-gray-900">
+  <header class="bg-white border-b sticky top-0 z-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
+      <a href="/" class="font-semibold tracking-tight">Your Company</a>
+      <div class="ml-auto text-sm">sales@yourco.example · +353 00 000 0000</div>
     </div>
-  </main>
+  </header>
+
+  <section class="bg-gray-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-white">
+      <h1 class="text-3xl sm:text-4xl font-bold">Cessna T-37 Aircraft Spares</h1>
+      <p class="mt-2 max-w-2xl text-white/90">Search & filter the live stock list, then request a quote.</p>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <label class="block">
+        <span class="text-sm font-medium">Search</span>
+        <input id="q" type="search" placeholder="Part #, NSN, Desc…" class="mt-1 w-full rounded-lg border px-3 py-2"/>
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium">Condition</span>
+        <select id="cond" class="mt-1 w-full rounded-lg border px-3 py-2">
+          <option value="">All</option><option>NS</option><option>SV</option><option>OH</option><option>AR</option><option>RP</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium">Min Qty</span>
+        <input id="minqty" type="number" min="0" class="mt-1 w-full rounded-lg border px-3 py-2"/>
+      </label>
+      <div class="flex items-end gap-2">
+        <button id="clear" class="rounded-lg border px-3 py-2" type="button">Clear</button>
+        <button id="exportSel" class="rounded-lg bg-blue-600 text-white px-3 py-2" type="button">Quote Selected</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Table -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="overflow-auto rounded-xl border bg-white">
+      <table class="w-full tg" role="table" aria-label="Inventory list">
+        <thead class="bg-gray-100 text-left text-sm">
+          <tr>
+            <th class="p-3 w-10"><span class="visually-hidden">Select</span></th>
+            <th class="p-3 sticky-col">Part Number</th>
+            <th class="p-3">NSN</th>
+            <th class="p-3">Alt. P/N</th>
+            <th class="p-3">Description</th>
+            <th class="p-3">Cond</th>
+            <th class="p-3">Qty</th>
+          </tr>
+        </thead>
+        <tbody id="rows" class="text-sm"></tbody>
+      </table>
+    </div>
+    <p id="count" class="mt-3 text-sm text-gray-600">Loading…</p>
+  </section>
+
+  <!-- Quote -->
+  <section id="quote" class="bg-white border-t">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-2xl font-semibold">Request a Quote</h2>
+        <form class="mt-6 grid gap-3" onsubmit="event.preventDefault(); submitQuote();">
+          <input required id="name" placeholder="Name" class="rounded-lg border px-3 py-2" />
+          <input required id="email" type="email" placeholder="Email" class="rounded-lg border px-3 py-2" />
+          <input id="phone" placeholder="Phone" class="rounded-lg border px-3 py-2" />
+          <textarea id="notes" placeholder="Notes (end-use, export, delivery)" class="rounded-lg border px-3 py-2 h-28"></textarea>
+          <textarea id="selected" readonly class="rounded-lg border px-3 py-2 h-28" placeholder="Selected line items will appear here"></textarea>
+          <button class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 w-max">Send</button>
+          <p id="formStatus" class="text-sm text-green-700 hidden">Sent. We’ll be in touch.</p>
+        </form>
+      </div>
+      <aside class="bg-gray-50 rounded-xl p-6 border text-sm text-gray-700">
+        <p class="font-semibold">Why buy from us?</p>
+        <ul class="mt-3 list-disc pl-5 space-y-1">
+          <li>Trusted, quality-assured supplier</li>
+          <li>Export compliance & end-user screening</li>
+          <li>Rapid AOG response</li>
+          <li>Global logistics support</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <footer class="border-t bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-sm text-gray-600">
+      &copy; <span id="yr"></span> Your Company.
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script>
+  (function () {
+    // Data source — local CSV is simplest & avoids CORS
+    const DATA_URL = '/inventory/t37.csv'; // or paste your Google "pub?output=csv" URL
+
+    const rows = document.getElementById('rows');
+    const q = document.getElementById('q');
+    const cond = document.getElementById('cond');
+    const minqty = document.getElementById('minqty');
+    const count = document.getElementById('count');
+    const clearBtn = document.getElementById('clear');
+    const exportBtn = document.getElementById('exportSel');
+    const selectedBox = document.getElementById('selected');
+
+    const state = { sel: new Set(), rowMap: new Map() };
+    let INVENTORY = [];
+
+    window.onerror = (msg) => { if (count) count.textContent = 'Error: ' + msg; };
+
+    function normalizeRow(r){
+      const has = (o,k)=>Object.prototype.hasOwnProperty.call(o,k)&&o[k]!==''&&o[k]!=null;
+      const s = v => (v==null?'':String(v).trim());
+      const n = v => { const m = String(v||'').replace(/[^0-9-]/g,''); return m?parseInt(m,10):0; };
+
+      const pn   = has(r,'pn')?r.pn:(has(r,'PARTNUMBER')?r.PARTNUMBER:'');
+      const nsn  = has(r,'nsn')?r.nsn:(has(r,'NSN')?r.NSN:'');
+      const alt  = has(r,'alt')?r.alt:(has(r,'ALTERNATEPARTNUMBER')?r.ALTERNATEPARTNUMBER:'');
+      const desc = has(r,'desc')?r.desc:(has(r,'DESCRIPTION')?r.DESCRIPTION:'');
+      const cnd  = has(r,'cond')?r.cond:(has(r,'CONDITIONCD')?r.CONDITIONCD:'');
+      const qty  = has(r,'qty')?r.qty:(has(r,'QUANTITY')?r.QUANTITY:'');
+
+      return { pn:s(pn), nsn:s(nsn), alt:s(alt), desc:s(desc), cond:s(cnd), qty:n(qty) };
+    }
+
+    function render(){
+      const term = (q?.value || '').toLowerCase();
+      const c = cond?.value || '';
+      const mq = Number(minqty?.value || 0);
+
+      const filtered = INVENTORY.filter(r => {
+        const hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
+        return hay.includes(term) && (!c || r.cond === c) && ((r.qty||0) >= mq);
+      });
+
+      rows.innerHTML = '';
+      state.rowMap.clear();
+
+      filtered.forEach(r => {
+        const key = (r.pn||'') + '|' + (r.nsn||'');
+        state.rowMap.set(key, r);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+        tr.innerHTML =
+          '<td class="p-3 align-top"><input type="checkbox" data-key="'+key+'" class="accent-blue-600"/></td>'+
+          '<td class="p-3 sticky-col font-medium">'+(r.pn||'')+'</td>'+
+          '<td class="p-3">'+(r.nsn||'')+'</td>'+
+          '<td class="p-3">'+(r.alt||'')+'</td>'+
+          '<td class="p-3">'+(r.desc||'')+'</td>'+
+          '<td class="p-3">'+(r.cond||'')+'</td>'+
+          '<td class="p-3">'+((r.qty??'')+'')+'</td>';
+        rows.appendChild(tr);
+      });
+
+      count.textContent = filtered.length + ' line item(s)';
+
+      rows.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+        cb.addEventListener('change', e=>{
+          const k = e.target.getAttribute('data-key');
+          if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
+          updateSelectedBox();
+        });
+      });
+
+      updateSelectedBox();
+    }
+
+    function updateSelectedBox(){
+      const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
+      const text = selected
+        .map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`)
+        .join('\n'); // ← fixed newline
+      if (selectedBox) selectedBox.value = text;
+    }
+
+    function submitQuote(){
+      document.getElementById('formStatus').classList.remove('hidden');
+      setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 4000);
+    }
+    window.submitQuote = submitQuote;
+
+    function loadData(){
+      Papa.parse(DATA_URL, {
+        download: true, header: true, skipEmptyLines: true, dynamicTyping: false,
+        complete: (r)=>{ INVENTORY = r.data.map(normalizeRow); render(); },
+        error: (err)=>{ console.error(err); if (count) count.textContent = 'Failed to load data.'; }
+      });
+    }
+
+    q?.addEventListener('input', render);
+    cond?.addEventListener('change', render);
+    minqty?.addEventListener('input', render);
+    clearBtn?.addEventListener('click', ()=>{ if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
+
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    loadData();
+  })();
+  </script>
 </body>
 </html>
