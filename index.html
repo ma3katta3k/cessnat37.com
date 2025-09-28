@@ -183,13 +183,14 @@
       updateSelectedBox();
     }
 
-    function updateSelectedBox(){
-      const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
-      const text = selected
-        .map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`)
-        .join('\n'); // ← fixed newline
+  function updateSelectedBox(){
+    const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
+    const text = selected
+      .map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`)
+      .join('\n');
       if (selectedBox) selectedBox.value = text;
-    }
+  }
+
 
     function submitQuote(){
       document.getElementById('formStatus').classList.remove('hidden');
