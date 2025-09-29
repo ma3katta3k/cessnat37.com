@@ -1,135 +1,119 @@
-// ====== Config ======
-const DATA_URL = '/inventory/t37.csv'; // swap to your Google "pub?output=csv" if desired
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cessna T-37 Aircraft Spares</title>
+  <meta name="description" content="Cessna T-37 spares with search, filters, and quick quote." />
+  <link rel="icon" href="data:,">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <!-- Load our code from a separate file -->
+  <script src="/assets/app.js" defer></script>
+  <style>
+    .sticky-col{position:sticky;left:0;background:#fff;box-shadow:1px 0 0 #e5e7eb}
+    .tg td,.tg th{border-bottom:1px solid #e5e7eb}
+    .vh{position:absolute;clip:rect(1px,1px,1px,1px);padding:0;border:0;height:1px;width:1px;overflow:hidden}
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <header class="bg-white border-b sticky top-0 z-20">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
+      <a class="font-semibold tracking-tight" href="/">Your Company</a>
+      <nav class="ml-auto text-sm flex items-center gap-4">
+        <a href="mailto:sales@yourco.example" class="hover:text-blue-700">sales@yourco.example</a>
+        <a href="tel:+3530000000" class="hover:text-blue-700">+353 00 000 0000</a>
+        <a href="#quote" class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5">Request a Quote</a>
+      </nav>
+    </div>
+  </header>
 
-// ====== DOM ======
-const rows = document.getElementById('rows');
-const q = document.getElementById('q');
-const cond = document.getElementById('cond');
-const minqty = document.getElementById('minqty');
-const count = document.getElementById('count');
-const clearBtn = document.getElementById('clear');
-const exportBtn = document.getElementById('exportSel');
+  <section class="bg-gray-800">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-white">
+      <h1 class="text-3xl sm:text-4xl font-bold">Cessna T-37 Aircraft Spares</h1>
+      <p class="mt-2 max-w-2xl text-white/90">Search & filter live stock. Select lines and send a fast RFQ.</p>
+    </div>
+  </section>
 
-const selectedBox = document.getElementById('selected');
-const quoteForm = document.getElementById('quoteForm');
-const mailtoLink = document.getElementById('mailtoLink');
+  <!-- Filters -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <label class="block">
+        <span class="text-sm font-medium">Search</span>
+        <input id="q" type="search" placeholder="Part #, NSN, Desc…" class="mt-1 w-full rounded-lg border px-3 py-2"/>
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium">Condition</span>
+        <select id="cond" class="mt-1 w-full rounded-lg border px-3 py-2">
+          <option value="">All</option><option>NS</option><option>SV</option><option>OH</option><option>AR</option><option>RP</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-sm font-medium">Min Qty</span>
+        <input id="minqty" type="number" min="0" class="mt-1 w-full rounded-lg border px-3 py-2"/>
+      </label>
+      <div class="flex items-end gap-2">
+        <button id="clear" class="rounded-lg border px-3 py-2" type="button">Clear</button>
+        <button id="exportSel" class="rounded-lg bg-blue-600 text-white px-3 py-2" type="button">Quote Selected</button>
+      </div>
+    </div>
+  </section>
 
-document.getElementById('yr').textContent = new Date().getFullYear();
+  <!-- Table -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="overflow-auto rounded-xl border bg-white">
+      <table class="w-full tg" role="table" aria-label="Inventory list">
+        <thead class="bg-gray-100 text-left text-sm">
+          <tr>
+            <th class="p-3 w-10"><span class="vh">Select</span></th>
+            <th class="p-3 sticky-col">Part Number</th>
+            <th class="p-3">NSN</th>
+            <th class="p-3">Alt. P/N</th>
+            <th class="p-3">Description</th>
+            <th class="p-3">Cond</th>
+            <th class="p-3">Qty</th>
+          </tr>
+        </thead>
+        <tbody id="rows" class="text-sm"></tbody>
+      </table>
+    </div>
+    <p id="count" class="mt-3 text-sm text-gray-600">Loading…</p>
+  </section>
 
-window.addEventListener('error', (e) => { if (count) count.textContent = 'Error: ' + e.message; });
+  <!-- Quote -->
+  <section id="quote" class="bg-white border-t">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-2xl font-semibold">Request a Quote</h2>
+        <form id="quoteForm" class="mt-6 grid gap-3">
+          <input required id="name" placeholder="Name" class="rounded-lg border px-3 py-2" />
+          <input required id="email" type="email" placeholder="Email" class="rounded-lg border px-3 py-2" />
+          <input id="phone" placeholder="Phone" class="rounded-lg border px-3 py-2" />
+          <textarea id="notes" placeholder="Notes (end-use, export, delivery)" class="rounded-lg border px-3 py-2 h-28"></textarea>
+          <textarea id="selected" readonly class="rounded-lg border px-3 py-2 h-28" placeholder="Selected line items appear here"></textarea>
+          <div class="flex gap-2">
+            <button class="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 w-max" type="submit">Email RFQ</button>
+            <a id="mailtoLink" class="hidden text-blue-700 underline" target="_blank" rel="noopener">Open email client</a>
+          </div>
+          <p id="formStatus" class="text-sm text-green-700 hidden">RFQ composed. Check your email client window.</p>
+        </form>
+      </div>
+      <aside class="bg-gray-50 rounded-xl p-6 border text-sm text-gray-700">
+        <p class="font-semibold">Why buy from us?</p>
+        <ul class="mt-3 list-disc pl-5 space-y-1">
+          <li>Trusted, quality-assured supplier</li>
+          <li>Export compliance & end-user screening</li>
+          <li>Rapid AOG response</li>
+          <li>Global logistics support</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
 
-let INVENTORY = [];
-const state = { sel: new Set(), rowMap: new Map() };
-
-// ====== Helpers ======
-function norm(r){
-  const has = (o,k)=>Object.prototype.hasOwnProperty.call(o,k) && o[k]!=='' && o[k]!=null;
-  const s = v => (v==null ? '' : String(v).trim());
-  const n = v => { const m = String(v||'').replace(/[^0-9-]/g,''); return m ? parseInt(m,10) : 0; };
-
-  const pn   = has(r,'pn')?r.pn:(has(r,'PARTNUMBER')?r.PARTNUMBER:'');
-  const nsn  = has(r,'nsn')?r.nsn:(has(r,'NSN')?r.NSN:'');
-  const alt  = has(r,'alt')?r.alt:(has(r,'ALTERNATEPARTNUMBER')?r.ALTERNATEPARTNUMBER:'');
-  const desc = has(r,'desc')?r.desc:(has(r,'DESCRIPTION')?r.DESCRIPTION:'');
-  const cnd  = has(r,'cond')?r.cond:(has(r,'CONDITIONCD')?r.CONDITIONCD:'');
-  const qty  = has(r,'qty')?r.qty:(has(r,'QUANTITY')?r.QUANTITY:'');
-
-  return { pn:s(pn), nsn:s(nsn), alt:s(alt), desc:s(desc), cond:s(cnd), qty:n(qty) };
-}
-
-function render(){
-  const term = (q?.value || '').toLowerCase();
-  const c = cond?.value || '';
-  const mq = Number(minqty?.value || 0);
-
-  const filtered = INVENTORY.filter(r => {
-    const hay = (r.pn + ' ' + r.nsn + ' ' + r.alt + ' ' + r.desc).toLowerCase();
-    return hay.includes(term) && (!c || r.cond === c) && ((r.qty||0) >= mq);
-  });
-
-  rows.innerHTML = '';
-  state.rowMap.clear();
-
-  filtered.forEach(r => {
-    const key = (r.pn||'') + '|' + (r.nsn||'');
-    state.rowMap.set(key, r);
-
-    const tr = document.createElement('tr');
-    tr.className = 'hover:bg-gray-50';
-    tr.innerHTML =
-      '<td class="p-3 align-top"><input type="checkbox" data-key="'+key+'" class="accent-blue-600"/></td>'+
-      '<td class="p-3 sticky-col font-medium">'+(r.pn||'')+'</td>'+
-      '<td class="p-3">'+(r.nsn||'')+'</td>'+
-      '<td class="p-3">'+(r.alt||'')+'</td>'+
-      '<td class="p-3">'+(r.desc||'')+'</td>'+
-      '<td class="p-3">'+(r.cond||'')+'</td>'+
-      '<td class="p-3">'+((r.qty??'')+'')+'</td>';
-    rows.appendChild(tr);
-  });
-
-  count.textContent = filtered.length + ' line item(s)';
-
-  rows.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
-    cb.addEventListener('change', e=>{
-      const k = e.target.getAttribute('data-key');
-      if (e.target.checked) state.sel.add(k); else state.sel.delete(k);
-      updateSelectedBox();
-    });
-  });
-
-  updateSelectedBox();
-}
-
-function updateSelectedBox(){
-  const selected = Array.from(state.sel).map(k => state.rowMap.get(k)).filter(Boolean);
-  const text = selected
-    .map(r => `PN ${r.pn} | ${r.desc} | Cond ${r.cond} | Qty ${r.qty}${r.nsn ? ` | NSN ${r.nsn}` : ''}`)
-    .join('\n'); // fixed newline
-  if (selectedBox) selectedBox.value = text;
-}
-
-function composeMailto(){
-  const to = 'sales@yourco.example';
-  const subject = 'RFQ: Cessna T-37 spares';
-  const body =
-    `Name: ${document.getElementById('name').value || ''}\n` +
-    `Email: ${document.getElementById('email').value || ''}\n` +
-    `Phone: ${document.getElementById('phone').value || ''}\n\n` +
-    `Notes:\n${document.getElementById('notes').value || ''}\n\n` +
-    `Selected Line Items:\n${selectedBox.value || ''}`;
-
-  const href = 'mailto:' + encodeURIComponent(to) +
-               '?subject=' + encodeURIComponent(subject) +
-               '&body=' + encodeURIComponent(body);
-  mailtoLink.href = href;
-  mailtoLink.classList.remove('hidden');
-  mailtoLink.click();
-  document.getElementById('formStatus').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 4000);
-}
-
-// ====== Events (no inline handlers) ======
-q?.addEventListener('input', render);
-cond?.addEventListener('change', render);
-minqty?.addEventListener('input', render);
-clearBtn?.addEventListener('click', ()=>{ if(q) q.value=''; if(cond) cond.value=''; if(minqty) minqty.value=''; state.sel.clear(); render(); });
-exportBtn?.addEventListener('click', ()=>{
-  if (!state.sel.size) { alert('Select at least one line.'); return; }
-  document.getElementById('quote').scrollIntoView({ behavior:'smooth' });
-});
-quoteForm?.addEventListener('submit', (e)=>{ e.preventDefault(); composeMailto(); });
-
-// ====== Load data (no inline scripts) ======
-function loadData(){
-  const url = DATA_URL + (DATA_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
-  fetch(url, { cache:'no-store' })
-    .then(res => { if (!res.ok) throw new Error('CSV HTTP '+res.status); return res.text(); })
-    .then(text => {
-      Papa.parse(text, { header:true, skipEmptyLines:true, dynamicTyping:false,
-        complete: (r)=>{ INVENTORY = r.data.map(norm); render(); }
-      });
-    })
-    .catch(err => { console.error(err); if (count) count.textContent = 'Failed to load data.'; });
-}
-
-loadData();
+  <footer class="border-t bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-sm text-gray-600">
+      &copy; <span id="yr"></span> Your Company.
+    </div>
+  </footer>
+</body>
+</html>
