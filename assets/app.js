@@ -19,6 +19,21 @@ window.addEventListener('error', e => { if (count) count.textContent = 'Error: '
 let INVENTORY = [];
 const state = { sel: new Set(), rowMap: new Map() };
 
+// after: const mailtoLink = document.getElementById('mailtoLink');
+
+const phoneInput = document.getElementById('phone');
+let iti = null;
+if (phoneInput && window.intlTelInput) {
+  iti = window.intlTelInput(phoneInput, {
+    // pick your default country; change to "us", "gb", etc. or leave "ie"
+    initialCountry: "ie",
+    separateDialCode: true,
+    // lazy-loaded utils for formatting/validation
+    utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.6.1/build/js/utils.js",
+  });
+}
+
+
 // ====== Helpers ======
 function norm(r){
   const has = (o,k)=>Object.prototype.hasOwnProperty.call(o,k) && o[k]!=='' && o[k]!=null;
@@ -89,10 +104,14 @@ function updateSelectedBox(){
 function composeMailto(){
   const to = 'sales@yourco.example';
   const subject = 'RFQ: Cessna T-37 spares';
+
+  // Get E.164 number from the widget if available, else raw input
+  const phoneVal = iti ? iti.getNumber() : (document.getElementById('phone').value || '');
+
   const body =
     `Name: ${document.getElementById('name').value || ''}\n` +
     `Email: ${document.getElementById('email').value || ''}\n` +
-    `Phone: ${document.getElementById('phone').value || ''}\n\n` +
+    `Phone: ${phoneVal}\n\n` +
     `Notes:\n${document.getElementById('notes').value || ''}\n\n` +
     `Selected Line Items:\n${selectedBox.value || ''}`;
 
@@ -105,6 +124,7 @@ function composeMailto(){
   document.getElementById('formStatus').classList.remove('hidden');
   setTimeout(()=>document.getElementById('formStatus').classList.add('hidden'), 4000);
 }
+
 
 // events (no inline handlers)
 q?.addEventListener('input', render);
