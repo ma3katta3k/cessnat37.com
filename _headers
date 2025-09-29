@@ -1,8 +1,12 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer-when-downgrade
-  # Allow Tailwind + PapaParse CDNs and (optionally) Google frames
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; frame-src 'self' https://docs.google.com https://*.google.com https://*.googleusercontent.com
+  Content-Security-Policy:
+    default-src 'self';
+    img-src 'self' data: https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;
+
 
 /inventory/*
   Cache-Control: public, max-age=300
